@@ -150,6 +150,25 @@ label.lb{font-size:13px;font-weight:700;color:var(--gray);display:block;margin:8
 /* 弹层 */
 .modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:flex-end;justify-content:center;z-index:80}
 .modal{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:520px;max-height:82vh;overflow-y:auto;padding:20px 18px calc(24px + env(safe-area-inset-bottom))}
+/* 内容层 */
+.layer{position:fixed;top:0;left:0;right:0;bottom:0;background:#f0f7ff;z-index:60;display:flex;flex-direction:column}
+.layer-head{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#eaf4ff;border-bottom:1px solid #dbe7f5;flex:none}
+.layer-head b{flex:1;text-align:center;font-size:16px}
+.page-scroll{flex:1;overflow-y:auto;padding:12px 14px 30px}
+.pw-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.pw-now{background:linear-gradient(135deg,#eff6ff,#fdf4ff);border:1.5px dashed #93c5fd}
+.pw-no{font-size:12px;color:var(--blue);font-weight:700}
+.pw-title{font-size:17px;font-weight:900;margin:4px 0 2px}
+.pw-line{font-size:14px;color:var(--gray);line-height:1.8;margin:6px 0}
+.pw-item{display:flex;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:8px 10px;margin-bottom:6px;font-size:13px;border:1px solid #eef2f7}
+.pw-item .no{color:#9ca3af;width:26px;flex:none}
+.pw-item.done{background:#f0fdf4;border-color:#bbf7d0}
+.pw-item .ck-mark{margin-left:auto;font-size:15px;flex:none}
+.phon-g{margin-bottom:12px}
+.phon-g h4{font-size:13px;color:var(--blue-d);margin:0 0 6px}
+.phon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.phon-cell{background:#fff;border-radius:10px;padding:7px 4px;text-align:center;font-size:11px;line-height:1.6}
+.phon-cell b{display:block;font-size:13px}
 </style>
 </head>
 <body>
@@ -242,6 +261,17 @@ label.lb{font-size:13px;font-weight:700;color:var(--gray);display:block;margin:8
 
 <div id="toast"></div>
 <div id="modalRoot"></div>
+
+<!-- ============ 内容层：古诗 75 首 ============ -->
+<div id="view-poem" class="layer hidden">
+  <div class="layer-head"><button class="link-back" onclick="closeLayer('poem')">← 返回</button><b id="layerTitle">📜 古诗 · 必背 75 首</b><span id="poemProg" style="font-size:13px"></span></div>
+  <div class="page-scroll" id="poemBody"></div>
+</div>
+<!-- ============ 内容层：英语音标表 ============ -->
+<div id="view-phonics" class="layer hidden">
+  <div class="layer-head"><button class="link-back" onclick="closePhonicsBack()">← 返回</button><b>🔤 48 个国际音标</b></div>
+  <div class="page-scroll" id="phonicsBody"></div>
+</div>
 </div>
 <script>
 "use strict";
@@ -384,6 +414,130 @@ const POEM4=[
 /* ============ 题库聚合与按年级取题 ============ */
 const BANKS={6:{math:MATH6,eng:ENG6,poem:POEM6},4:{math:MATH4,eng:ENG4,poem:POEM4}};
 function pickQ(list,seed){const d=new Date();const day=Math.floor(d.getTime()/86400000);const idx=(day*7+seed*13+list.length)%list.length;return list[idx];}
+/* ================= 内容库：古诗必背75首（课标目录） ================= */
+const POEMS75=[
+{t:"江南",a:"汉乐府",f:"江南可采莲，莲叶何田田"},
+{t:"长歌行",a:"汉乐府",f:"少壮不努力，老大徒伤悲"},
+{t:"敕勒歌",a:"北朝民歌",f:"天苍苍，野茫茫，风吹草低见牛羊"},
+{t:"咏鹅",a:"骆宾王",f:"白毛浮绿水，红掌拨清波"},
+{t:"风",a:"李峤",f:"解落三秋叶，能开二月花"},
+{t:"咏柳",a:"贺知章",f:"不知细叶谁裁出，二月春风似剪刀"},
+{t:"回乡偶书",a:"贺知章",f:"儿童相见不相识，笑问客从何处来"},
+{t:"凉州词",a:"王之涣",f:"羌笛何须怨杨柳，春风不度玉门关"},
+{t:"登鹳雀楼",a:"王之涣",f:"欲穷千里目，更上一层楼"},
+{t:"春晓",a:"孟浩然",f:"夜来风雨声，花落知多少"},
+{t:"凉州词",a:"王翰",f:"醉卧沙场君莫笑，古来征战几人回"},
+{t:"出塞",a:"王昌龄",f:"但使龙城飞将在，不教胡马度阴山"},
+{t:"芙蓉楼送辛渐",a:"王昌龄",f:"洛阳亲友如相问，一片冰心在玉壶"},
+{t:"鹿柴",a:"王维",f:"空山不见人，但闻人语响"},
+{t:"送元二使安西",a:"王维",f:"劝君更尽一杯酒，西出阳关无故人"},
+{t:"九月九日忆山东兄弟",a:"王维",f:"独在异乡为异客，每逢佳节倍思亲"},
+{t:"静夜思",a:"李白",f:"举头望明月，低头思故乡"},
+{t:"古朗月行",a:"李白",f:"小时不识月，呼作白玉盘"},
+{t:"望庐山瀑布",a:"李白",f:"飞流直下三千尺，疑是银河落九天"},
+{t:"赠汪伦",a:"李白",f:"桃花潭水深千尺，不及汪伦送我情"},
+{t:"黄鹤楼送孟浩然之广陵",a:"李白",f:"孤帆远影碧空尽，唯见长江天际流"},
+{t:"早发白帝城",a:"李白",f:"两岸猿声啼不住，轻舟已过万重山"},
+{t:"望天门山",a:"李白",f:"两岸青山相对出，孤帆一片日边来"},
+{t:"别董大",a:"高适",f:"莫愁前路无知己，天下谁人不识君"},
+{t:"绝句（两个黄鹂）",a:"杜甫",f:"窗含西岭千秋雪，门泊东吴万里船"},
+{t:"春夜喜雨",a:"杜甫",f:"随风潜入夜，润物细无声"},
+{t:"绝句（迟日江山）",a:"杜甫",f:"泥融飞燕子，沙暖睡鸳鸯"},
+{t:"江畔独步寻花",a:"杜甫",f:"桃花一簇开无主，可爱深红爱浅红"},
+{t:"枫桥夜泊",a:"张继",f:"月落乌啼霜满天，江枫渔火对愁眠"},
+{t:"滁州西涧",a:"韦应物",f:"春潮带雨晚来急，野渡无人舟自横"},
+{t:"游子吟",a:"孟郊",f:"谁言寸草心，报得三春晖"},
+{t:"早春呈水部张十八员外",a:"韩愈",f:"天街小雨润如酥，草色遥看近却无"},
+{t:"渔歌子",a:"张志和",f:"青箬笠，绿蓑衣，斜风细雨不须归"},
+{t:"塞下曲",a:"卢纶",f:"欲将轻骑逐，大雪满弓刀"},
+{t:"望洞庭",a:"刘禹锡",f:"遥望洞庭山水翠，白银盘里一青螺"},
+{t:"浪淘沙",a:"刘禹锡",f:"如今直上银河去，同到牵牛织女家"},
+{t:"赋得古原草送别",a:"白居易",f:"野火烧不尽，春风吹又生"},
+{t:"池上",a:"白居易",f:"不解藏踪迹，浮萍一道开"},
+{t:"忆江南",a:"白居易",f:"日出江花红胜火，春来江水绿如蓝"},
+{t:"小儿垂钓",a:"胡令能",f:"路人借问遥招手，怕得鱼惊不应人"},
+{t:"悯农（锄禾）",a:"李绅",f:"谁知盘中餐，粒粒皆辛苦"},
+{t:"悯农（春种）",a:"李绅",f:"四海无闲田，农夫犹饿死"},
+{t:"江雪",a:"柳宗元",f:"孤舟蓑笠翁，独钓寒江雪"},
+{t:"寻隐者不遇",a:"贾岛",f:"只在此山中，云深不知处"},
+{t:"山行",a:"杜牧",f:"停车坐爱枫林晚，霜叶红于二月花"},
+{t:"清明",a:"杜牧",f:"借问酒家何处有，牧童遥指杏花村"},
+{t:"江南春",a:"杜牧",f:"南朝四百八十寺，多少楼台烟雨中"},
+{t:"蜂",a:"罗隐",f:"采得百花成蜜后，为谁辛苦为谁甜"},
+{t:"江上渔者",a:"范仲淹",f:"君看一叶舟，出没风波里"},
+{t:"元日",a:"王安石",f:"千门万户曈曈日，总把新桃换旧符"},
+{t:"泊船瓜洲",a:"王安石",f:"春风又绿江南岸，明月何时照我还"},
+{t:"书湖阴先生壁",a:"王安石",f:"一水护田将绿绕，两山排闼送青来"},
+{t:"六月二十七日望湖楼醉书",a:"苏轼",f:"卷地风来忽吹散，望湖楼下水如天"},
+{t:"饮湖上初晴后雨",a:"苏轼",f:"欲把西湖比西子，淡妆浓抹总相宜"},
+{t:"惠崇春江晓景",a:"苏轼",f:"竹外桃花三两枝，春江水暖鸭先知"},
+{t:"题西林壁",a:"苏轼",f:"不识庐山真面目，只缘身在此山中"},
+{t:"夏日绝句",a:"李清照",f:"生当作人杰，死亦为鬼雄"},
+{t:"三衢道中",a:"曾几",f:"绿阴不减来时路，添得黄鹂四五声"},
+{t:"示儿",a:"陆游",f:"王师北定中原日，家祭无忘告乃翁"},
+{t:"秋夜将晓出篱门迎凉有感",a:"陆游",f:"遗民泪尽胡尘里，南望王师又一年"},
+{t:"四时田园杂兴（昼出耘田）",a:"范成大",f:"童孙未解供耕织，也傍桑阴学种瓜"},
+{t:"四时田园杂兴（梅子金黄）",a:"范成大",f:"日长篱落无人过，唯有蜻蜓蛱蝶飞"},
+{t:"小池",a:"杨万里",f:"小荷才露尖尖角，早有蜻蜓立上头"},
+{t:"晓出净慈寺送林子方",a:"杨万里",f:"接天莲叶无穷碧，映日荷花别样红"},
+{t:"春日",a:"朱熹",f:"等闲识得东风面，万紫千红总是春"},
+{t:"观书有感",a:"朱熹",f:"问渠那得清如许，为有源头活水来"},
+{t:"题临安邸",a:"林升",f:"暖风熏得游人醉，直把杭州作汴州"},
+{t:"游园不值",a:"叶绍翁",f:"春色满园关不住，一枝红杏出墙来"},
+{t:"乡村四月",a:"翁卷",f:"乡村四月闲人少，才了蚕桑又插田"},
+{t:"墨梅",a:"王冕",f:"不要人夸好颜色，只留清气满乾坤"},
+{t:"石灰吟",a:"于谦",f:"粉骨碎身浑不怕，要留清白在人间"},
+{t:"竹石",a:"郑燮",f:"千磨万击还坚劲，任尔东西南北风"},
+{t:"所见",a:"袁枚",f:"意欲捕鸣蝉，忽然闭口立"},
+{t:"村居",a:"高鼎",f:"儿童散学归来早，忙趁东风放纸鸢"},
+{t:"己亥杂诗",a:"龚自珍",f:"我劝天公重抖擞，不拘一格降人才"}
+];
+/* === 英语内容库：小学高频单词（含音标） === */
+const EN_WORDS=[
+{w:"apple",ipa:"/ˈæpl/",cn:"苹果"}, {w:"banana",ipa:"/bəˈnɑːnə/",cn:"香蕉"}, {w:"orange",ipa:"/ˈɒrɪndʒ/",cn:"橙子"}, {w:"bread",ipa:"/bred/",cn:"面包"},
+{w:"milk",ipa:"/mɪlk/",cn:"牛奶"}, {w:"egg",ipa:"/eɡ/",cn:"鸡蛋"}, {w:"rice",ipa:"/raɪs/",cn:"米饭"}, {w:"water",ipa:"/ˈwɔːtə(r)/",cn:"水"},
+{w:"dog",ipa:"/dɒɡ/",cn:"狗"}, {w:"cat",ipa:"/kæt/",cn:"猫"}, {w:"bird",ipa:"/bɜːd/",cn:"鸟"}, {w:"fish",ipa:"/fɪʃ/",cn:"鱼"},
+{w:"red",ipa:"/red/",cn:"红色"}, {w:"blue",ipa:"/bluː/",cn:"蓝色"}, {w:"green",ipa:"/ɡriːn/",cn:"绿色"}, {w:"yellow",ipa:"/ˈjeləʊ/",cn:"黄色"},
+{w:"big",ipa:"/bɪɡ/",cn:"大的"}, {w:"small",ipa:"/smɔːl/",cn:"小的"}, {w:"long",ipa:"/lɒŋ/",cn:"长的"}, {w:"short",ipa:"/ʃɔːt/",cn:"短的"},
+{w:"happy",ipa:"/ˈhæpi/",cn:"开心的"}, {w:"sad",ipa:"/sæd/",cn:"难过的"}, {w:"tall",ipa:"/tɔːl/",cn:"高的"}, {w:"new",ipa:"/njuː/",cn:"新的"},
+{w:"one",ipa:"/wʌn/",cn:"一"}, {w:"two",ipa:"/tuː/",cn:"二"}, {w:"three",ipa:"/θriː/",cn:"三"}, {w:"four",ipa:"/fɔː(r)/",cn:"四"},
+{w:"five",ipa:"/faɪv/",cn:"五"}, {w:"six",ipa:"/sɪks/",cn:"六"}, {w:"seven",ipa:"/ˈsevn/",cn:"七"}, {w:"eight",ipa:"/eɪt/",cn:"八"},
+{w:"nine",ipa:"/naɪn/",cn:"九"}, {w:"ten",ipa:"/ten/",cn:"十"}, {w:"hundred",ipa:"/ˈhʌndrəd/",cn:"百"}, {w:"first",ipa:"/fɜːst/",cn:"第一"},
+{w:"father",ipa:"/ˈfɑːðə(r)/",cn:"爸爸"}, {w:"mother",ipa:"/ˈmʌðə(r)/",cn:"妈妈"}, {w:"brother",ipa:"/ˈbrʌðə(r)/",cn:"兄弟"}, {w:"sister",ipa:"/ˈsɪstə(r)/",cn:"姐妹"},
+{w:"family",ipa:"/ˈfæməli/",cn:"家庭"}, {w:"friend",ipa:"/frend/",cn:"朋友"}, {w:"teacher",ipa:"/ˈtiːtʃə(r)/",cn:"老师"}, {w:"student",ipa:"/ˈstjuːdnt/",cn:"学生"},
+{w:"school",ipa:"/skuːl/",cn:"学校"}, {w:"class",ipa:"/klɑːs/",cn:"班级"}, {w:"book",ipa:"/bʊk/",cn:"书"}, {w:"pen",ipa:"/pen/",cn:"钢笔"},
+{w:"pencil",ipa:"/ˈpensl/",cn:"铅笔"}, {w:"ruler",ipa:"/ˈruːlə(r)/",cn:"尺子"}, {w:"bag",ipa:"/bæɡ/",cn:"书包"}, {w:"desk",ipa:"/desk/",cn:"课桌"},
+{w:"run",ipa:"/rʌn/",cn:"跑"}, {w:"jump",ipa:"/dʒʌmp/",cn:"跳"}, {w:"swim",ipa:"/swɪm/",cn:"游泳"}, {w:"sing",ipa:"/sɪŋ/",cn:"唱歌"},
+{w:"dance",ipa:"/dɑːns/",cn:"跳舞"}, {w:"read",ipa:"/riːd/",cn:"读书"}, {w:"write",ipa:"/raɪt/",cn:"写"}, {w:"draw",ipa:"/drɔː/",cn:"画画"},
+{w:"play",ipa:"/pleɪ/",cn:"玩"}, {w:"walk",ipa:"/wɔːk/",cn:"走路"}, {w:"eat",ipa:"/iːt/",cn:"吃"}, {w:"drink",ipa:"/drɪŋk/",cn:"喝"},
+{w:"sleep",ipa:"/sliːp/",cn:"睡觉"}, {w:"open",ipa:"/ˈəʊpən/",cn:"打开"}, {w:"close",ipa:"/kləʊz/",cn:"关上"}, {w:"look",ipa:"/lʊk/",cn:"看"},
+{w:"morning",ipa:"/ˈmɔːnɪŋ/",cn:"早晨"}, {w:"afternoon",ipa:"/ˌɑːftəˈnuːn/",cn:"下午"}, {w:"evening",ipa:"/ˈiːvnɪŋ/",cn:"晚上"}, {w:"today",ipa:"/təˈdeɪ/",cn:"今天"},
+{w:"tomorrow",ipa:"/təˈmɒrəʊ/",cn:"明天"}, {w:"week",ipa:"/wiːk/",cn:"星期"}, {w:"Monday",ipa:"/ˈmʌndeɪ/",cn:"星期一"}, {w:"Sunday",ipa:"/ˈsʌndeɪ/",cn:"星期日"},
+{w:"sunny",ipa:"/ˈsʌni/",cn:"晴朗的"}, {w:"rainy",ipa:"/ˈreɪni/",cn:"下雨的"}, {w:"windy",ipa:"/ˈwɪndi/",cn:"有风的"}, {w:"cloudy",ipa:"/ˈklaʊdi/",cn:"多云的"},
+{w:"hot",ipa:"/hɒt/",cn:"热的"}, {w:"cold",ipa:"/kəʊld/",cn:"冷的"}, {w:"warm",ipa:"/wɔːm/",cn:"温暖的"}, {w:"cool",ipa:"/kuːl/",cn:"凉爽的"},
+{w:"bus",ipa:"/bʌs/",cn:"公交车"}, {w:"car",ipa:"/kɑː(r)/",cn:"汽车"}, {w:"bike",ipa:"/baɪk/",cn:"自行车"}, {w:"train",ipa:"/treɪn/",cn:"火车"},
+{w:"ship",ipa:"/ʃɪp/",cn:"轮船"}, {w:"plane",ipa:"/pleɪn/",cn:"飞机"}, {w:"metro",ipa:"/ˈmetrəʊ/",cn:"地铁"}, {w:"station",ipa:"/ˈsteɪʃn/",cn:"车站"},
+{w:"park",ipa:"/pɑːk/",cn:"公园"}, {w:"zoo",ipa:"/zuː/",cn:"动物园"}, {w:"museum",ipa:"/mjuˈziːəm/",cn:"博物馆"}, {w:"library",ipa:"/ˈlaɪbrəri/",cn:"图书馆"},
+{w:"sea",ipa:"/siː/",cn:"大海"}, {w:"mountain",ipa:"/ˈmaʊntən/",cn:"山"}, {w:"flower",ipa:"/ˈflaʊə(r)/",cn:"花"}, {w:"tree",ipa:"/triː/",cn:"树"}
+];
+/* === 英语内容库：常用短语 === */
+const EN_PHRASES=[
+{p:"get up",cn:"起床"}, {p:"go to school",cn:"去上学"}, {p:"go home",cn:"回家"}, {p:"have breakfast",cn:"吃早饭"},
+{p:"do homework",cn:"做作业"}, {p:"play football",cn:"踢足球"}, {p:"watch TV",cn:"看电视"}, {p:"listen to music",cn:"听音乐"},
+{p:"read books",cn:"读书"}, {p:"take a bus",cn:"坐公交车"}, {p:"by metro",cn:"乘地铁"}, {p:"on foot",cn:"步行"},
+{p:"look at",cn:"看……"}, {p:"listen to",cn:"听……"}, {p:"get up early",cn:"早起"}, {p:"go to bed",cn:"上床睡觉"},
+{p:"wash my face",cn:"洗脸"}, {p:"brush my teeth",cn:"刷牙"}, {p:"in the morning",cn:"在早上"}, {p:"after school",cn:"放学后"}
+];
+/* === 英语内容库：48 个国际音标速查 === */
+const PHON_GROUPS=[
+{g:"单元音（12个）",list:[["/iː/","see 看见"],["/ɪ/","sit 坐"],["/e/","bed 床"],["/æ/","cat 猫"],["/ɜː/","bird 鸟"],["/ə/","about 关于"],["/ʌ/","cup 杯子"],["/ɑː/","car 汽车"],["/ɔː/","door 门"],["/ɒ/","dog 狗"],["/ʊ/","book 书"],["/uː/","moon 月亮"]]},
+{g:"双元音（8个）",list:[["/eɪ/","cake 蛋糕"],["/aɪ/","kite 风筝"],["/ɔɪ/","boy 男孩"],["/əʊ/","go 去"],["/aʊ/","house 房子"],["/ɪə/","ear 耳朵"],["/eə/","hair 头发"],["/ʊə/","sure 确定"]]},
+{g:"清辅音（10个）",list:[["/p/","pen 钢笔"],["/t/","ten 十"],["/k/","cat 猫"],["/f/","fish 鱼"],["/θ/","three 三"],["/s/","six 六"],["/ʃ/","ship 轮船"],["/tʃ/","chair 椅子"],["/tr/","tree 树"],["/ts/","cats 猫(复数)"]]},
+{g:"浊辅音（12个）",list:[["/b/","bag 书包"],["/d/","dog 狗"],["/ɡ/","go 去"],["/v/","five 五"],["/ð/","this 这"],["/z/","zoo 动物园"],["/ʒ/","usually 通常"],["/dʒ/","jump 跳"],["/dr/","draw 画画"],["/dz/","beds 床(复数)"],["/r/","red 红色"],["/l/","like 喜欢"]]},
+{g:"鼻音/半元音（6个）",list:[["/m/","mum 妈妈"],["/n/","nine 九"],["/ŋ/","sing 唱歌"],["/h/","hat 帽子"],["/w/","water 水"],["/j/","yes 是的"]]}
+];
+/*ENG_PHON_END*/
+
 /* ================= 配置与默认数据 ================= */
 const LS_KEY="familyCheckinSZ_v1";
 const CK_CATS=[
@@ -531,12 +685,19 @@ function renderCheckin(){
   let h="";
   CK_CATS.forEach(function(c){
     const isDone=doneIds[c.id];
-    h+='<div class="ck'+(isDone?" done":"")+'" '+(isDone?"":'onclick="doCheck(\''+c.id+'\')"')+'>'
+    const act=c.id==="poem"?"openPoemLayer()":c.id==="eng"?"openEngLayer()":"doCheck('"+c.id+"')";
+    let sub="";
+    if(!isDone){
+      if(c.id==="poem"){const cur=poemToday(u);sub=cur?("第 "+cur.no+" / 75 首 · 《"+cur.t+"》"):("75 首全背完 🎉");}
+      else if(c.id==="eng"){sub="今日 5 词 + 1 短语（含音标）";}
+      else{sub=c.tip;}
+    }
+    h+='<div class="ck'+(isDone?" done":"")+'" '+(isDone?"":'onclick="'+act+'"')+'>'
       +'<span class="ck-ico">'+c.ico+'</span>'
       +(isDone?'<span class="tick">✔</span>':"")
       +'<div class="ck-nm">'+c.nm+'</div>'
       +'<div class="ck-pts">'+(isDone?"已打卡 +"+CK_PTS:"+"+CK_PTS+" 积分")+'</div>'
-      +(isDone?"":'<div class="ck-pts" style="font-size:11px">'+c.tip+'</div>')
+      +(isDone?"":'<div class="ck-pts" style="font-size:11px">'+sub+'</div>')
       +'</div>';
   });
   $("checkGrid").innerHTML=h;
@@ -559,6 +720,125 @@ function doCheck(cid){
   if(wasFull){u.fullDays=(u.fullDays||0)+1;setPoints(u,CK_BONUS,"今日五项全勤奖励");toast("🎉 今日五项全勤 +"+CK_BONUS);}
   saveDB();renderCheckin();refreshTop();
   toast("✅ "+CK_CATS.filter(function(c){return c.id===cid;})[0].nm+"打卡成功 +"+CK_PTS);
+}
+/* ================= 内容层：古诗 75 首 & 英语词库 ================= */
+function closeLayer(nm){
+  $("view-poem").classList.add("hidden");
+  $("view-phonics").classList.add("hidden");
+  if(CUR)renderCheckin();
+}
+function poemDoneList(u){if(!u.poemDone)u.poemDone=[];return u.poemDone;}
+function poemToday(u){
+  const done=poemDoneList(u);
+  for(let i=0;i<POEMS75.length;i++){if(done.indexOf(i)<0)return{no:i+1,i:i,t:POEMS75[i].t,a:POEMS75[i].a,f:POEMS75[i].f};}
+  return null;
+}
+function engWordsToday(){
+  const day=Math.floor(Date.now()/86400000);
+  const base=day%EN_WORDS.length;
+  const picks=[];
+  for(let i=0;i<5;i++){const idx=(base+i*13)%EN_WORDS.length;if(picks.indexOf(idx)<0)picks.push(idx);}
+  return picks.map(function(i){return EN_WORDS[i];});
+}
+function openPoemLayer(){
+  $("view-phonics").classList.add("hidden");
+  $("view-poem").classList.remove("hidden");
+  $("layerTitle").textContent="📜 古诗 · 必背 75 首";
+  renderPoemLayer();
+}
+function openEngLayer(){
+  $("view-phonics").classList.add("hidden");
+  $("view-poem").classList.remove("hidden");
+  $("layerTitle").textContent="🗣️ 今日英语任务";
+  renderEngLayer();
+}
+function closePhonicsBack(){
+  $("view-phonics").classList.add("hidden");
+  $("view-poem").classList.remove("hidden");
+  renderEngLayer();
+}
+function renderPoemLayer(){
+  const u=user(CUR);const done=poemDoneList(u);
+  $("poemProg").textContent="已背 "+done.length+"/75";
+  let h="";
+  const cur=poemToday(u);
+  const today=todayStr();
+  const cked=(u.ck[today]||[]).indexOf("poem")>=0;
+  if(cur){
+    h+='<div class="pw-card pw-now"><div class="pw-no">今日背诵 · 第 '+cur.no+' / 75 首</div>'
+      +'<div class="pw-title">《'+cur.t+'》</div><div class="muted" style="font-size:13px">'+(cur.a?cur.a+" 作":"")+'</div>'
+      +'<div class="pw-line">「'+cur.f+'」</div>'
+      +'<button class="btn btn-p" style="width:100%" '+(cked?"disabled":"")+' onclick="ckPoemNow()">'
+      +(cked?"今日已打卡 ✔":"背会了，打卡 +10")+'</button></div>';
+  }else{
+    const review=Math.floor(Date.now()/86400000)%POEMS75.length;
+    h+='<div class="pw-card pw-now"><div class="pw-no">🎉 75 首都背完啦！今日复习</div>'
+      +'<div class="pw-title">《'+POEMS75[review].t+'》</div><div class="pw-line">「'+POEMS75[review].f+'」</div>'
+      +'<button class="btn btn-p" style="width:100%" '+(cked?"disabled":"")+' onclick="ckPoemNow()">'
+      +(cked?"今日已打卡 ✔":"复习一遍，打卡 +10")+'</button></div>';
+  }
+  h+='<div class="pw-card"><div class="pw-no">📖 背诵进度清单（点右侧 ○ 标记已背熟）</div>';
+  POEMS75.forEach(function(p,i){
+    const isD=done.indexOf(i)>=0;
+    const isCur=cur&&cur.i===i;
+    h+='<div class="pw-item'+(isD?" done":"")+'" style="'+(isCur?"border-color:#60a5fa;background:#eff6ff":"")+'">'
+      +'<span class="no">'+(i+1)+'</span><span style="flex:1"><b>《'+p.t+'》</b> <span class="muted">'+p.a+'</span>'
+      +(isCur?' <span class="pill pill-blue">今日</span>':"")+'</span>'
+      +'<span class="ck-mark" style="cursor:pointer" onclick="togglePoem('+i+')">'+(isD?"✅":"⭕")+'</span></div>';
+  });
+  h+='</div><div class="muted" style="font-size:12px;text-align:center;margin-top:4px">目录依据《义务教育语文课程标准》1-6 年级必背 75 首</div>';
+  $("poemBody").innerHTML=h;
+}
+function ckPoemNow(){
+  const u=user(CUR);
+  const today=todayStr();
+  const cked=(u.ck[today]||[]).indexOf("poem")>=0;
+  if(cked){toast("今天已经打过古诗卡啦");return;}
+  const cur=poemToday(u);
+  if(cur){const done=poemDoneList(u);if(done.indexOf(cur.i)<0){done.push(cur.i);u.poemDone=done;saveDB();}}
+  doCheck("poem");
+  renderPoemLayer();refreshTop();
+}
+function togglePoem(i){
+  const u=user(CUR);const done=poemDoneList(u);
+  const at=done.indexOf(i);
+  if(at>=0){done.splice(at,1);toast("已取消标记");}
+  else{done.push(i);toast("已标记背熟 ✔");}
+  saveDB();renderPoemLayer();renderCheckin();
+}
+function renderEngLayer(){
+  const u=user(CUR);
+  const today=todayStr();
+  const cked=(u.ck[today]||[]).indexOf("eng")>=0;
+  const ws=engWordsToday();
+  const day=Math.floor(Date.now()/86400000);
+  const ph=EN_PHRASES[day%EN_PHRASES.length];
+  let h='<div class="pw-card pw-now"><div class="pw-no">🗣️ 今日英语任务</div>'
+    +'<div style="font-size:13px" class="muted">读一读下面的单词和短语，注意音标发音</div></div>';
+  h+='<div class="pw-card"><div class="pw-no">📚 今日 5 个单词（含音标）</div>';
+  ws.forEach(function(w){
+    h+='<div class="pw-item"><span style="flex:1"><b>'+w.w+'</b> <span class="muted">'+w.cn+'</span></span>'
+      +'<span class="muted" style="font-family:Consolas,monospace">'+w.ipa+'</span></div>';
+  });
+  h+='</div><div class="pw-card"><div class="pw-no">💬 今日短语</div>'
+    +'<div class="pw-line" style="margin:4px 0 0"><b>'+ph.p+'</b> <span class="muted">'+ph.cn+'</span></div></div>';
+  h+='<div class="pw-card"><div class="pw-no">🔤 不会读音标？</div>'
+    +'<button class="btn btn-p btn-sm mt8" onclick="openPhonicsLayer()">打开 48 个国际音标速查表</button></div>';
+  h+='<button class="btn btn-p" style="width:100%" '+(cked?"disabled":"")+' onclick="ckEngNow()">'
+    +(cked?"今日已打卡 ✔":"读完啦，打卡 +10")+'</button>';
+  $("poemBody").innerHTML=h;
+}
+function ckEngNow(){doCheck("eng");renderEngLayer();refreshTop();}
+function openPhonicsLayer(){
+  $("view-phonics").classList.remove("hidden");
+  let h="";
+  PHON_GROUPS.forEach(function(g){
+    h+='<div class="phon-g"><h4>'+g.g+'</h4><div class="phon-grid">';
+    g.list.forEach(function(pair){h+='<div class="phon-cell"><b>'+pair[0]+'</b><span class="muted">'+pair[1]+'</span></div>';});
+    h+='</div></div>';
+  });
+  h+='<div class="muted" style="font-size:12px;text-align:center;margin-top:6px">读单词时先看音标符号 → 找对应发音 → 连起来读</div>';
+  $("phonicsBody").innerHTML=h;
 }
 function renderParentCheckin(){
   const kids=["bro","sis"].map(function(k){return DB.users[k];}).filter(Boolean);
