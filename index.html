@@ -17,8 +17,17 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
   background:radial-gradient(circle at 50% 0%,var(--sky) 0%,#ffffff 65%);
   color:var(--ink); min-height:100vh; padding-bottom:78px;
+  position:relative;
 }
-#app{max-width:520px;margin:0 auto;padding:18px 16px 20px}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(110px 110px at 10% 16%,rgba(251,191,36,.14),transparent 62%),
+    radial-gradient(130px 130px at 90% 10%,rgba(59,130,246,.12),transparent 62%),
+    radial-gradient(90px 90px at 82% 72%,rgba(34,197,94,.10),transparent 62%),
+    radial-gradient(70px 70px at 6% 68%,rgba(139,92,246,.08),transparent 62%);
+}
+#app{max-width:520px;margin:0 auto;padding:18px 16px 20px;position:relative;z-index:1}
 /* ---------- 通用 ---------- */
 .card{background:var(--card);border-radius:22px;box-shadow:0 6px 18px rgba(59,130,246,.10);padding:16px;margin-bottom:14px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:999px;
@@ -79,8 +88,8 @@ body{
 .top-user{display:flex;align-items:center;gap:10px}
 .top-user .ava{width:44px;height:44px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:24px}
 .top-user .nm{font-weight:800;font-size:16px;line-height:1.2}
-.points-chip{background:linear-gradient(90deg,#fef3c7,#fde68a);border:2px solid #fcd34d;color:#92400e;
-  border-radius:999px;padding:6px 12px;font-weight:900;font-size:14px;box-shadow:0 2px 6px rgba(251,191,36,.35)}
+.points-chip{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fffbe8,#ffe9b8);border:1.5px solid #f6cf7d;color:#8a5a00;
+  border-radius:999px;padding:5px 13px;font-weight:900;font-size:14px;box-shadow:0 2px 8px rgba(217,119,6,.18),inset 0 1px 0 rgba(255,255,255,.7)}
 /* ---------- 打卡 ---------- */
 .sec-title{font-size:16px;font-weight:800;margin:4px 2px 10px;display:flex;align-items:center;gap:8px}
 .check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
@@ -169,6 +178,8 @@ label.lb{font-size:13px;font-weight:700;color:var(--gray);display:block;margin:8
 .phon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .phon-cell{background:#fff;border-radius:10px;padding:7px 4px;text-align:center;font-size:11px;line-height:1.6}
 .phon-cell b{display:block;font-size:13px}
+.num-in{flex:1;padding:10px 12px;font-size:22px;font-weight:800;border:2px solid #d1d5db;border-radius:12px;text-align:center;outline:none;min-width:0}
+.num-in:focus{border-color:var(--blue)}
 </style>
 </head>
 <body>
@@ -209,7 +220,7 @@ label.lb{font-size:13px;font-weight:700;color:var(--gray);display:block;margin:8
         <div style="font-size:12px;color:var(--gray)" id="mRoleLine"></div>
       </div>
     </div>
-    <div class="points-chip">🪙 <span id="mPoints">0</span></div>
+    <div class="points-chip">💰 <span id="mPoints">0</span></div>
   </div>
 
   <!-- 打卡 tab -->
@@ -536,6 +547,105 @@ const PHON_GROUPS=[
 {g:"浊辅音（12个）",list:[["/b/","bag 书包"],["/d/","dog 狗"],["/ɡ/","go 去"],["/v/","five 五"],["/ð/","this 这"],["/z/","zoo 动物园"],["/ʒ/","usually 通常"],["/dʒ/","jump 跳"],["/dr/","draw 画画"],["/dz/","beds 床(复数)"],["/r/","red 红色"],["/l/","like 喜欢"]]},
 {g:"鼻音/半元音（6个）",list:[["/m/","mum 妈妈"],["/n/","nine 九"],["/ŋ/","sing 唱歌"],["/h/","hat 帽子"],["/w/","water 水"],["/j/","yes 是的"]]}
 ];
+/* === 学习卡内容库：每日学习习惯建议 === */
+const STUDY_TIPS=[
+{t:"先复习，再写作业",d:"写作业前花 5 分钟翻看今天笔记，作业又快又对。"},
+{t:"作业限时完成",d:"像考试一样给自己计时，提高专注力，不走神。"},
+{t:"错题不过夜",d:"当天作业里的错题当天弄懂，问老师或家长，绝不积压。"},
+{t:"番茄钟学习法",d:"学 25 分钟休息 5 分钟，再继续，效率更高。"},
+{t:"写完自己检查一遍",d:"先自己检查再合上作业本，能发现一半的粗心错误。"},
+{t:"大声朗读课文",d:"每天朗读 10 分钟，语文英语都受益。"},
+{t:"预习明天的新课",d:"花 10 分钟翻看明天要学的课本，上课更容易听懂。"},
+{t:"整理书桌和书包",d:"学习前把桌面清空，只留要用的书，注意力更集中。"},
+{t:"每天练 10 分钟字",d:"把字写端正，卷面分稳稳到手。"},
+{t:"给自己定小目标",d:"今天做完哪 3 件事？写下来，完成一件打一个勾。"},
+{t:"先做难的，再做简单的",d:"大脑最清醒时攻克难题，简单题放后面很轻松。"},
+{t:"用好错题本",d:"把错题抄进本子，一周后再做一遍，进步看得见。"},
+{t:"睡前过电影",d:"睡前闭眼回想今天学了什么，记不住的一早起来马上看。"},
+{t:"提问是最好的学习",d:"今天有一个不懂的，就主动问一次老师或同学。"},
+{t:"劳逸结合",d:"每学 45 分钟起来活动 5 分钟，学习更持久。"}
+];
+/* === 运动卡内容库：深圳体育项目动作库（含中考项目） ===
+   g=达标数值(打卡需≥g)  u=单位(个/秒/厘米/米/分钟)  set=进阶建议 */
+const SPORTS_LIB=[
+{n:"跳绳",tag:"中考选考",t:"双脚并拢轻跳，手腕摇绳，前脚掌落地",set:"进阶：1 分钟挑战 140+ 个",ico:"⏱️",g:200,u:"个"},
+{n:"开合跳",tag:"体能",t:"跳起时双脚打开、双手头顶击掌，落地轻",set:"进阶：分 3 组完成更轻松",ico:"🤸",g:60,u:"个"},
+{n:"高抬腿",tag:"体能",t:"膝盖抬到腰部高度，前脚掌快速着地",set:"进阶：每组 20 秒，间歇 10 秒",ico:"🏃",g:60,u:"个"},
+{n:"深蹲",tag:"下肢力量",t:"双脚与肩同宽，下蹲时膝盖不过脚尖，腰背挺直",set:"进阶：分 2 组 × 15 个",ico:"🦵",g:30,u:"个"},
+{n:"平板支撑",tag:"核心力量",t:"肘撑地，身体成一条直线，不塌腰不撅臀",set:"进阶：3 组 × 30 秒，组间休息 30 秒",ico:"🧘",g:40,u:"秒"},
+{n:"仰卧起坐",tag:"中考选考",t:"躺平屈膝，双手抱头，用腹部力量起坐，不借手臂力",set:"进阶：1 分钟做到 30+ 个",ico:"🛏️",g:25,u:"个"},
+{n:"立定跳远",tag:"中考选考",t:"预摆后蹬地跳远，落地屈膝缓冲，手臂向后摆",set:"进阶：量 3 次，记最好成绩",ico:"🦘",g:120,u:"厘米"},
+{n:"坐位体前屈",tag:"中考选考",t:"双腿伸直坐地，双手向前推，不弓背不弯膝",set:"进阶：推 3 次取最远，每天进步一点点",ico:"🙆",g:5,u:"厘米"},
+{n:"慢跑",tag:"耐力基础",t:"三步一吸三步一呼，步子小一点、均匀跑",set:"进阶：跑 15-20 分钟",ico:"🏃‍♂️",g:10,u:"分钟"},
+{n:"中长跑",tag:"中考必考",t:"先匀速后加速，最后 100 米冲刺，注意呼吸节奏",set:"进阶：男生 1000 米 / 女生 800 米（循序渐进）",ico:"🎽",g:600,u:"米"},
+{n:"引体向上",tag:"中考选考(男)",t:"握杠略宽于肩，用背部和手臂力量上拉，下巴过杠",set:"练不了可先做悬垂 20 秒×3 组",ico:"💪",g:1,u:"个"},
+{n:"篮球运球",tag:"中考选考",t:"手指手腕发力拍球，球不高于腰部，眼不看球",set:"进阶：左右手交替各 5 分钟",ico:"🏀",g:10,u:"分钟"},
+{n:"足球绕杆",tag:"中考选考",t:"用脚内侧轻推球，绕杆时小步调整",set:"进阶：5 组绕杆计时",ico:"⚽",g:10,u:"分钟"},
+{n:"游泳",tag:"中考选考",t:"先学好蛙泳换气，蹬腿夹水再划手，注意安全",set:"200 米（需家长陪同，在正规泳池）",ico:"🏊",g:100,u:"米"},
+{n:"羽毛球",tag:"球类兴趣",t:"握拍放松，击球点在身体前上方，挥拍要完整",set:"进阶：对打 20 分钟",ico:"🏸",g:15,u:"分钟"},
+{n:"乒乓球",tag:"球类兴趣",t:"盯住球，挥拍动作小而快，脚步跟上",set:"进阶：对打 20 分钟",ico:"🏓",g:15,u:"分钟"},
+{n:"拉伸放松",tag:"每日必做",t:"运动后拉伸大腿前后侧和小腿各 20 秒，减少酸痛",set:"全身主要肌群各 20 秒",ico:"🧘‍♀️",g:3,u:"分钟"}
+];
+/* === 知识卡内容库：每日百科小知识（48 条） === */
+const KNOW_LIB=[
+{q:"天空为什么是蓝色的？",k:"太阳光里有七种颜色，蓝光最容易被空气散射开来，所以晴天我们看到的天空是蓝色的。"},
+{q:"月亮本身会发光吗？",k:"不会。我们看到的月光是月亮反射的太阳光。"},
+{q:"为什么先看到闪电，后听到雷声？",k:"光的速度比声音快得多，闪电的光几乎瞬间到达，雷声要慢慢传过来。"},
+{q:"海水为什么是咸的？",k:"河水把陆地上的盐分带进大海，海水蒸发、盐留了下来，亿万年越积越咸。"},
+{q:"蜜蜂飞的时候为什么会嗡嗡响？",k:"不是嘴巴叫，是翅膀每秒扇动约 200 次发出的声音。"},
+{q:"企鹅会飞吗？",k:"不会。但它是游泳高手，在水里像鱼雷一样快。"},
+{q:"长颈鹿的脖子有多少块骨头？",k:"和人类一样是 7 块颈椎，只是每一块都非常长。"},
+{q:"为什么猫的眼睛夜里会发光？",k:"猫眼底有一层反光膜，把微弱的光反射回来，帮它在夜里看清东西。"},
+{q:"地球绕太阳一圈要多久？",k:"约 365 天，也就是我们的一年。"},
+{q:"为什么影子会跟着人动？",k:"光沿直线传播，被身体挡住的地方就形成影子，光源位置一变影子就变。"},
+{q:"指南针为什么总是指向北方？",k:"地球是个大磁铁，指南针的磁针顺着地球磁场指向南北。"},
+{q:"为什么冰会浮在水面上？",k:"水结成冰后体积变大、变轻，所以冰浮在水面，冬天河面结冰鱼儿还能在下面活。"},
+{q:"人一天大约要呼吸多少次？",k:"约 2 万次，吸入氧气，呼出二氧化碳。"},
+{q:"心脏一天要跳动多少次？",k:"约 10 万次，把血液送到全身，一分钟约 70 次。"},
+{q:"人为什么要睡觉？",k:"大脑白天工作很累，睡觉时大脑清理垃圾、巩固记忆，睡足才聪明。"},
+{q:"骨头是硬的，为什么还能长高？",k:"骨头两端有软骨，软骨不断变成硬骨，人就慢慢长高了。"},
+{q:"为什么感冒要多喝水？",k:"水能帮助身体排毒、稀释痰液，让免疫系统更好战斗。"},
+{q:"盐吃多了对身体有什么影响？",k:"会加重心脏和肾脏负担，还可能引起高血压，所以清淡饮食更健康。"},
+{q:"为什么铁会生锈？",k:"铁和空气中的氧气、水接触后发生化学反应，生成铁锈。保持干燥能防锈。"},
+{q:"为什么热水比冷水结冰慢？",k:"一般热水要先降温到冷水温度再结冰，所以更慢（同条件下）。"},
+{q:"放大镜为什么能点火？",k:"放大镜是凸透镜，能把阳光聚到一个点上，温度升高到可以点燃纸。"},
+{q:"为什么天空的云不会掉下来？",k:"云是小水滴和小冰晶，非常轻，上升气流托着它们，落下来就是雨或雪。"},
+{q:"彩虹有几种颜色？",k:"七种：红橙黄绿蓝靛紫。雨后阳光被小水滴折射出来。"},
+{q:"为什么潜水艇能在水下航行？",k:"靠调节自身重量：注水变重下沉，排水变轻上浮。"},
+{q:"高铁为什么那么快？",k:"流线型车身减小空气阻力，电力驱动加先进轨道，时速可达 350 公里。"},
+{q:"深圳地铁最高时速约多少？",k:"地铁一般 80-120 公里/小时，高峰期几分钟一班。"},
+{q:"为什么深圳叫鹏城？",k:"传说深圳大鹏湾像一只大鹏鸟，深圳也像大鹏一样飞速发展。"},
+{q:"深圳湾大桥连接深圳和哪里？",k:"香港。它横跨深圳湾，是深港之间的重要通道。"},
+{q:"平安金融中心约多少米？",k:"约 599 米，是深圳第一高楼，曾是中国南方最高建筑。"},
+{q:"为什么广东人说粤语？",k:"粤语是广东主要方言之一，历史非常悠久，保留了很多古汉语读音。"},
+{q:"电脑为什么叫电脑？",k:"它能像人脑一样计算和处理信息，每秒能算上亿次。"},
+{q:"手机怎么知道你在哪里？",k:"靠卫星定位（GPS/北斗），卫星发信号，手机算出距离就知道位置了。"},
+{q:"WiFi 是看不见的，它是什么？",k:"WiFi 是无线电波的一种，像收音机信号一样在空中传播，手机接收后就能上网。"},
+{q:"为什么电池用久了会没电？",k:"电池里的化学物质用完就没了。充电电池可以靠充电把化学物质变回去。"},
+{q:"电是怎么来到家里的？",k:"发电厂发电 → 高压电线长途输送 → 变电站降压 → 送到每栋楼每家。"},
+{q:"雷雨天能不能在大树下躲雨？",k:"不能！大树容易引雷，雷雨天要远离大树、电线杆，到室内躲避。"},
+{q:"过马路为什么要看两次？",k:"先看左再看右（靠右行驶的国家），走到路中间再看一次，更安全。"},
+{q:"发生火灾逃生时要怎么做？",k:"用湿毛巾捂住口鼻，弯腰低姿沿墙走，走楼梯不坐电梯，及时拨打 119。"},
+{q:"陌生人给的东西能不能要？",k:"不能。要有自我保护意识，遇到危险大声呼救并找警察或大人帮忙。"},
+{q:"洗手的正确时长是多少？",k:"用肥皂搓洗至少 20 秒，大概唱两遍《生日快乐》的时间。"},
+{q:"为什么饭前要洗手？",k:"手上有很多看不见的细菌，洗手能洗掉大部分，防止病从口入。"},
+{q:"为什么不能长时间看手机？",k:"眼睛长时间近距离工作会疲劳，容易近视。每 20 分钟要远眺休息。"},
+{q:"牛奶为什么对长高有帮助？",k:"牛奶富含钙，钙是骨骼生长的重要原料，每天一杯奶很关键。"},
+{q:"为什么早餐很重要？",k:"一夜没吃东西，大脑需要能量，吃好早餐上课才精神。"},
+{q:"挑食会有什么后果？",k:"营养不均衡会影响长高和大脑发育，什么菜都要尝一尝。"},
+{q:"为什么运动后要喝水？",k:"出汗流失了水分，但不要一次喝太猛，少量多次最好。"},
+{q:"跳绳为什么能长高？",k:"跳绳刺激骨骼生长板，还能锻炼协调性，是很好的纵向运动。"},
+{q:"深圳夏天为什么常下雨？",k:"深圳靠近赤道和海洋，暖湿气流多，夏秋还有台风带来降雨。"}
+];
+/* === 小小家务：子项目与积分 === */
+const CHORES=[
+{id:"mop",nm:"拖地",ico:"🧽",pts:15},
+{id:"dish",nm:"洗碗",ico:"🍽️",pts:15},
+{id:"sock",nm:"洗袜子",ico:"🧦",pts:8},
+{id:"trash",nm:"丢垃圾",ico:"🗑️",pts:5},
+{id:"tidy",nm:"整理房间",ico:"📦",pts:20},
+{id:"bed",nm:"叠被子",ico:"🛏️",pts:5}
+];
 /*ENG_PHON_END*/
 
 /* ================= 配置与默认数据 ================= */
@@ -685,25 +795,38 @@ function renderCheckin(){
   let h="";
   CK_CATS.forEach(function(c){
     const isDone=doneIds[c.id];
-    const act=c.id==="poem"?"openPoemLayer()":c.id==="eng"?"openEngLayer()":"doCheck('"+c.id+"')";
+    const opener={poem:"openPoemLayer",eng:"openEngLayer",study:"openStudyLayer",sport:"openSportLayer",know:"openKnowLayer"};
+    const act=opener[c.id]?opener[c.id]+"()":"doCheck('"+c.id+"')";
     let sub="";
     if(!isDone){
       if(c.id==="poem"){const cur=poemToday(u);sub=cur?("第 "+cur.no+" / 75 首 · 《"+cur.t+"》"):("75 首全背完 🎉");}
       else if(c.id==="eng"){sub="今日 5 词 + 1 短语（含音标）";}
+      else if(c.id==="study"){sub="每日习惯 · "+studyToday().t;}
+      else if(c.id==="sport"){const s=sportToday();sub="今日运动 · "+s.n+"（达标 "+s.g+" "+s.u+"）";}
+      else if(c.id==="know"){sub="今日知识 · "+knowToday().q;}
       else{sub=c.tip;}
     }
-    h+='<div class="ck'+(isDone?" done":"")+'" '+(isDone?"":'onclick="'+act+'"')+'>'
+    h+='<div class="ck'+(isDone?" done":"")+'" onclick="'+act+'">'
       +'<span class="ck-ico">'+c.ico+'</span>'
       +(isDone?'<span class="tick">✔</span>':"")
       +'<div class="ck-nm">'+c.nm+'</div>'
       +'<div class="ck-pts">'+(isDone?"已打卡 +"+CK_PTS:"+"+CK_PTS+" 积分")+'</div>'
-      +(isDone?"":'<div class="ck-pts" style="font-size:11px">'+sub+'</div>')
+      +'<div class="ck-pts" style="font-size:11px">'+sub+'</div>'
       +'</div>';
   });
+  const tdone=(u.ck[today]||[]);
+  const chDoneN=CHORES.filter(function(c){return tdone.indexOf(c.id)>=0;}).length;
+  const chFull=chDoneN===CHORES.length;
+  h+='<div class="ck'+(chFull?" done":"")+'" onclick="openChoreLayer()">'
+    +'<span class="ck-ico">🧹</span>'+(chFull?'<span class="tick">✔</span>':"")
+    +'<div class="ck-nm">小小家务</div>'
+    +'<div class="ck-pts">完成 '+chDoneN+' / '+CHORES.length+' 项</div>'
+    +'<div class="ck-pts" style="font-size:11px">拖地洗碗叠被子…每项积分不同</div>'
+    +'</div>';
   $("checkGrid").innerHTML=h;
   $("streakBar").innerHTML='<span class="streak-fire">🔥</span>'
     +'<div style="flex:1"><div class="streak-num">连续打卡 '+u.streak+' 天</div>'
-    +'<div class="streak-txt">每连续 7 天奖励 +'+STREAK_BONUS+' 分；一天 5 项全勤再奖 +'+CK_BONUS+' 分</div></div>';
+    +'<div class="streak-txt">每连续 7 天奖励 +'+STREAK_BONUS+' 分；5 项全勤或家务 6 项全完成，各奖 +'+CK_BONUS+' 分</div></div>';
   $("tipBox").textContent=SZ_TIPS[Math.floor((Date.now()/86400000)%SZ_TIPS.length)];
 }
 function doCheck(cid){
@@ -711,11 +834,11 @@ function doCheck(cid){
   const done=u.ck[today]||[];
   if(done.indexOf(cid)>=0){toast("今天这项已经打过卡啦");return;}
   done.push(cid);u.ck[today]=done;
-  const isFirst=u.lastCk!==today&&u.lastCk===yesterdayStr();
-  const wasFull=done.length===CK_CATS.length;
-  let gained=CK_PTS;
-  if(u.lastCk!==today){u.streak=(u.lastCk===yesterdayStr())?u.streak+1:1;u.lastCk=today;}
-  if(u.streak>0&&u.streak%7===0&&done.length===1){gained+=STREAK_BONUS;setPoints(u,STREAK_BONUS,"连续打卡 "+u.streak+" 天奖励");}
+  const wasFull=CK_CATS.every(function(c){return done.indexOf(c.id)>=0;});
+  if(u.lastCk!==today){
+    u.streak=(u.lastCk===yesterdayStr())?u.streak+1:1;u.lastCk=today;
+    if(u.streak>0&&u.streak%7===0){setPoints(u,STREAK_BONUS,"连续打卡 "+u.streak+" 天奖励");toast("🔥 连续 "+u.streak+" 天！奖励 +"+STREAK_BONUS);}
+  }
   setPoints(u,CK_PTS,CK_CATS.filter(function(c){return c.id===cid;})[0].nm+"打卡");
   if(wasFull){u.fullDays=(u.fullDays||0)+1;setPoints(u,CK_BONUS,"今日五项全勤奖励");toast("🎉 今日五项全勤 +"+CK_BONUS);}
   saveDB();renderCheckin();refreshTop();
@@ -757,6 +880,171 @@ function closePhonicsBack(){
   $("view-poem").classList.remove("hidden");
   renderEngLayer();
 }
+/* ================= 学习 / 运动 / 知识 内容卡 ================= */
+function dayIdx(){return Math.floor(Date.now()/86400000);}
+function studyToday(){const d=dayIdx();return STUDY_TIPS[d%STUDY_TIPS.length];}
+function knowToday(){const d=dayIdx();return KNOW_LIB[d%KNOW_LIB.length];}
+/* 运动：每周洗牌一次，同一周内 7 天项目不重复，周一起循环新一周 */
+function mulberry(seed){let t=seed>>>0;return function(){t+=0x6D2B79F5;let r=Math.imul(t^t>>>15,1|t);r^=r+Math.imul(r^r>>>7,61|r);return((r^r>>>14)>>>0)/4294967296;};}
+function weekStartIdx(){return Math.floor(dayIdx()/7)*7;}
+function sportToday(){
+  const d=dayIdx();
+  const rnd=mulberry(Math.floor(dayIdx()/7)*0x9E3779B9);
+  const arr=SPORTS_LIB.slice();
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));const tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;}
+  return arr[(d-weekStartIdx())%7];
+}
+function ckFlag(t){const u=user(CUR);const today=todayStr();return (u.ck[today]||[]).indexOf(t)>=0;}
+function ckContentNow(t){
+  if(ckFlag(t)){toast("今天已经打过这张卡啦");return;}
+  doCheck(t);
+  if(t==="study")renderStudyLayer();
+  else if(t==="sport")renderSportLayer();
+  else if(t==="know")renderKnowLayer();
+  refreshTop();renderCheckin();
+}
+function openStudyLayer(){
+  $("view-phonics").classList.add("hidden");
+  $("view-poem").classList.remove("hidden");
+  $("layerTitle").textContent="📚 学习打卡 · 每日一习";
+  renderStudyLayer();
+}
+function openSportLayer(){
+  $("view-phonics").classList.add("hidden");
+  $("view-poem").classList.remove("hidden");
+  $("layerTitle").textContent="⚽ 运动打卡 · 今日练什么";
+  renderSportLayer();
+}
+function openKnowLayer(){
+  $("view-phonics").classList.add("hidden");
+  $("view-poem").classList.remove("hidden");
+  $("layerTitle").textContent="🔬 知识打卡 · 今日小百科";
+  renderKnowLayer();
+}
+function renderStudyLayer(){
+  const s=studyToday();
+  const cked=ckFlag("study");
+  let h='<div class="pw-card pw-now"><div class="pw-no">今日学习习惯 · 第 '+((dayIdx()%STUDY_TIPS.length)+1)+'/'+STUDY_TIPS.length+' 条</div>'
+    +'<div class="pw-title">💡 '+s.t+'</div>'
+    +'<div class="pw-line">'+s.d+'</div>'
+    +'<div class="muted" style="font-size:12px">做到后点下方按钮打卡。每天一个好习惯，坚持就是进步！</div></div>'
+    +'<button class="btn btn-p" style="width:100%" '+(cked?"disabled":"")+' onclick="ckContentNow(\'study\')">'
+    +(cked?"今日已打卡 ✔":"今天做到了，打卡 +10")+'</button>';
+  $("poemBody").innerHTML=h;
+}
+function renderSportLayer(){
+  const s=sportToday();
+  const stretch=SPORTS_LIB[SPORTS_LIB.length-1];
+  const cked=ckFlag("sport");
+  let h='<div class="pw-card pw-now"><div class="pw-no">今日主练 · '+s.ico+'</div>'
+    +'<div class="pw-title">'+s.n+'</div>'
+    +'<div class="pw-line">要领：'+s.t+'</div>'
+    +'<div class="pw-line" style="color:var(--blue);font-weight:700">'+s.set+'</div>'
+    +'<div style="margin-top:6px"><span class="pill pill-blue">'+s.tag+'</span></div></div>';
+  if(!cked){
+    h+='<div class="pw-card" style="border:1.5px solid #fcd34d;background:#fffbeb"><div class="pw-no">🎯 今日达标线</div>'
+      +'<div style="display:flex;align-items:baseline;gap:8px;margin:6px 0 4px"><span style="font-size:38px;font-weight:900;color:var(--orange)">'+s.g+'</span>'
+      +'<span style="font-size:16px;font-weight:700">'+s.u+'</span></div>'
+      +'<div class="muted" style="font-size:12px">做完后填实际数量，达标才能打卡拿积分</div></div>'
+      +'<div class="pw-card"><div class="pw-no">✍️ 我实际完成了多少？</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><input id="sportVal" class="num-in" type="number" inputmode="decimal" min="0" placeholder="0" oninput="sportInput()">'
+      +'<span style="font-size:16px;font-weight:700;flex:none">'+s.u+'</span></div>'
+      +'<div id="sportHint" style="margin-top:8px;font-size:13px;font-weight:700;min-height:18px"></div>'
+      +'<button id="sportGo" class="btn btn-p" style="width:100%" disabled onclick="ckSport()">完成达标，打卡 +10</button></div>';
+  }
+  h+='<div class="pw-card"><div class="pw-no">🧘 练完别忘拉伸</div><div class="pw-title" style="font-size:15px">'+stretch.n+'（达标 '+stretch.g+' '+stretch.u+'）</div>'
+    +'<div class="pw-line" style="font-size:13px">'+stretch.t+'</div></div>'
+    +'<div class="pw-card"><div class="pw-no">📋 运动达标线总览 · 全部 '+SPORTS_LIB.length+' 项（含中考项目）</div>';
+  SPORTS_LIB.forEach(function(x){
+    h+='<div class="pw-item" style="font-size:12px;padding:7px 10px"><span class="no" style="width:20px;text-align:center">'+x.ico+'</span>'
+      +'<span style="flex:1">'+x.n+' <span class="muted" style="font-size:10px">'+x.tag+'</span></span>'
+      +'<span class="pill pill-blue" style="font-size:11px;padding:2px 8px">≥ '+x.g+' '+x.u+'</span></div>';
+  });
+  h+='</div>';
+  if(cked){h+='<div class="pw-card" style="text-align:center;background:#f0fdf4;border-color:#bbf7d0"><b style="color:#16a34a">今日运动已达标打卡 ✔</b><div class="muted" style="font-size:12px;margin-top:4px">明天继续加油！</div></div>';}
+  $("poemBody").innerHTML=h;
+}
+function sportInput(){
+  const s=sportToday();
+  const v=parseFloat(($("sportVal")||{}).value);
+  const b=$("sportGo"),hint=$("sportHint");
+  if(!b)return;
+  if(isNaN(v)||v<0){b.disabled=true;if(hint)hint.textContent="";return;}
+  if(v<s.g){
+    if(hint){hint.textContent="还差 "+(s.g-v)+" "+s.u+"，再坚持一下 💪";hint.style.color="#dc2626";}
+    b.disabled=true;
+  }else{
+    if(hint){hint.textContent="达标了！今天练得很到位 👏";hint.style.color="#16a34a";}
+    b.disabled=false;
+  }
+}
+function ckSport(){
+  const s=sportToday();
+  const v=parseFloat(($("sportVal")||{}).value);
+  if(!(v>=s.g)){toast("还没达到 "+s.g+" "+s.u+"，再练一小会儿");return;}
+  ckContentNow("sport");
+}
+function renderKnowLayer(){
+  const k=knowToday();
+  const cked=ckFlag("know");
+  let h='<div class="pw-card pw-now"><div class="pw-no">今日小百科 · 第 '+((dayIdx()%KNOW_LIB.length)+1)+'/'+KNOW_LIB.length+' 条</div>'
+    +'<div class="pw-title">❓ '+k.q+'</div>'
+    +'<div class="pw-line" style="font-size:15px">'+k.k+'</div>'
+    +'<div class="muted" style="font-size:12px">读给爸爸妈妈听，讲明白才算真的会！</div></div>'
+    +'<button class="btn btn-p" style="width:100%" '+(cked?"disabled":"")+' onclick="ckContentNow(\'know\')">'
+    +(cked?"今日已打卡 ✔":"读懂了，打卡 +10")+'</button>';
+  $("poemBody").innerHTML=h;
+}
+/* ================= 小小家务 ================= */
+function openChoreLayer(){
+  $("view-phonics").classList.add("hidden");
+  $("view-poem").classList.remove("hidden");
+  $("layerTitle").textContent="🧹 小小家务 · 多劳多得";
+  renderChoreLayer();
+}
+function choreDoneIds(){
+  const u=user(CUR);const today=todayStr();const done=u.ck[today]||[];
+  return CHORES.filter(function(c){return done.indexOf(c.id)>=0;}).map(function(c){return c.id;});
+}
+function renderChoreLayer(){
+  const u=user(CUR);
+  const today=todayStr();
+  const done=u.ck[today]||[];
+  const doneN=CHORES.filter(function(c){return done.indexOf(c.id)>=0;}).length;
+  let h='<div class="pw-card pw-now"><div class="pw-no">🧹 今日家务 · 完成 '+doneN+' / '+CHORES.length+' 项</div>'
+    +'<div class="muted" style="font-size:12px;margin-top:4px">做一项点一项，难度不同积分不同。全部完成再奖家务小能手 +'+CK_BONUS+'！</div></div>';
+  CHORES.forEach(function(c){
+    const ck=done.indexOf(c.id)>=0;
+    h+='<div class="pw-card" style="display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;'
+      +(ck?"background:#f0fdf4;border-color:#bbf7d0":"background:#fff")+'" '
+      +(ck?"":'onclick="choreCheck(\''+c.id+'\')"')+'>'
+      +'<span style="font-size:26px">'+c.ico+'</span>'
+      +'<span style="flex:1"><b style="font-size:15px">'+c.nm+'</b><div class="muted" style="font-size:11px">'
+      +(ck?"已完成 ✔":"点一下记录完成")+'</div></span>'
+      +'<span class="pill '+(ck?"pill-green":"pill-amber")+'" style="font-size:14px;padding:5px 12px">'+(ck?"已做":"+"+c.pts)+'</span></div>';
+  });
+  h+='<div class="muted" style="font-size:12px;text-align:center">家务全勤奖励与上面 5 项全勤分开计算，两边都能拿</div>';
+  $("poemBody").innerHTML=h;
+}
+function choreCheck(id){
+  const u=user(CUR);const today=todayStr();
+  const done=u.ck[today]||[];
+  if(done.indexOf(id)>=0){toast("这项今天已经做过啦");return;}
+  const ch=CHORES.filter(function(c){return c.id===id;})[0];
+  if(!ch)return;
+  done.push(id);u.ck[today]=done;
+  if(u.lastCk!==today){
+    u.streak=(u.lastCk===yesterdayStr())?u.streak+1:1;u.lastCk=today;
+    if(u.streak>0&&u.streak%7===0){setPoints(u,STREAK_BONUS,"连续打卡 "+u.streak+" 天奖励");toast("🔥 连续 "+u.streak+" 天！奖励 +"+STREAK_BONUS);}
+  }
+  const chDone=CHORES.filter(function(c){return done.indexOf(c.id)>=0;});
+  if(chDone.length===CHORES.length){setPoints(u,CK_BONUS,"家务全勤奖励");toast("🧹 家务 6 项全完成，额外 +"+CK_BONUS);}
+  setPoints(u,ch.pts,"家务 · "+ch.nm);
+  saveDB();renderCheckin();refreshTop();
+  renderChoreLayer();
+  toast("✅ "+ch.nm+" +"+ch.pts);
+}
+
 function renderPoemLayer(){
   const u=user(CUR);const done=poemDoneList(u);
   $("poemProg").textContent="已背 "+done.length+"/75";
@@ -846,11 +1134,13 @@ function renderParentCheckin(){
   let rows="";
   kids.forEach(function(k){
     const done=k.ck[today]||[];const dMap={};done.forEach(function(x){dMap[x]=1;});
-    const chips=CK_CATS.map(function(c){return '<span class="pill '+(dMap[c.id]?"pill-green":"")+'" style="'+(dMap[c.id]?"":"opacity:.45")+'">'+c.ico+' '+c.nm+'</span>';}).join(" ");
+    const chN=CHORES.filter(function(c){return dMap[c.id];}).length;
+    const chips=CK_CATS.map(function(c){return '<span class="pill '+(dMap[c.id]?"pill-green":"")+'" style="'+(dMap[c.id]?"":"opacity:.45")+'">'+c.ico+' '+c.nm+'</span>';}).join(" ")
+      +' <span class="pill '+(chN===CHORES.length?"pill-green":"")+'" style="'+(chN===CHORES.length?"":"opacity:.45")+'">🧹 家务 '+chN+'/'+CHORES.length+'</span>';
     const quizTxt=k.quizDone===today?"✅ 今日一练已完成":"⬜ 今日一练未完成";
     rows+='<div class="card"><div class="row between"><div class="row gap8"><div style="font-size:28px">'+k.emoji+'</div>'
       +'<div><div style="font-weight:800">'+esc(k.name)+' · '+k.grade+' 年级</div>'
-      +'<div class="muted" style="font-size:12px">连续 '+k.streak+' 天 · 🪙'+k.points+' 分</div></div></div></div>'
+      +'<div class="muted" style="font-size:12px">连续 '+k.streak+' 天 · 💰'+k.points+' 分</div></div></div></div>'
       +'<div style="margin-top:10px">'+chips+'</div>'
       +'<div style="margin-top:8px;font-size:13px" class="muted">'+quizTxt+' · 近 7 日打卡：'+recent7(k)+' 天</div></div>';
   });
@@ -961,12 +1251,12 @@ function renderShop(){
   const on=DB.rewards.filter(function(r){return r.on;});
   let h='<div class="q-card" style="padding:14px 16px"><div class="row between"><div><b style="font-size:17px">🎁 积分商城</b>'
     +'<div class="muted" style="font-size:12px">赚积分 → 兑换心愿，家长审核通过即生效</div></div>'
-    +'<div class="points-chip">🪙 '+u.points+'</div></div></div>';
+    +'<div class="points-chip">💰 '+u.points+'</div></div></div>';
   on.forEach(function(r){
     const can=u.points>=r.price;
     h+='<div class="shop-item"><div class="shop-ico">'+r.ico+'</div><div class="shop-info">'
       +'<div class="shop-nm">'+esc(r.nm)+'</div><div class="shop-desc">兑换后需家长确认</div></div>'
-      +'<div style="text-align:right"><div class="price"><span class="c">🪙</span>'+r.price+'</div>'
+      +'<div style="text-align:right"><div class="price"><span class="c">💰</span>'+r.price+'</div>'
       +'<button class="btn btn-sm '+(can?"btn-o":"")+'" style="margin-top:6px" '+(can?"":"disabled")+' onclick="redeem('+r.id+')">兑换</button></div></div>';
   });
   if(on.length===0){h+='<div class="card muted" style="text-align:center">奖品池为空，等家长上架吧</div>';}
@@ -1098,7 +1388,7 @@ function renderAdmin(){
   let h='<div class="q-card"><b>🛠️ 家长后台</b><div class="muted" style="font-size:12px">管理档案 · 积分 · 奖品</div></div>';
   /* 子档案 */
   kids.forEach(function(k){
-    h+='<div class="admin-sec"><div class="h">'+k.emoji+' '+esc(k.name)+'（'+k.grade+' 年级）· 🪙'+k.points+'</div>'
+    h+='<div class="admin-sec"><div class="h">'+k.emoji+' '+esc(k.name)+'（'+k.grade+' 年级）· 💰'+k.points+'</div>'
       +'<label class="lb">昵称</label><input class="inp" id="nm_'+k.uid+'" value="'+esc(k.name)+'">'
       +'<label class="lb">年级（决定每日一练难度：4=四年级同步，6=小升初衔接）</label>'
       +'<select class="inp" id="gr_'+k.uid+'"><option value="4"'+(k.grade===4?" selected":"")+'>四年级</option><option value="6"'+(k.grade===6?" selected":"")+'>六年级（小升初衔接）</option></select>'
