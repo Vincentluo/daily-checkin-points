@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#3b82f6">
+<title>每日打卡 · 积分乐园（深圳小升初版）</title>
+<style>
+:root{
+  --blue:#3b82f6; --blue-d:#2563eb; --sky:#e8f4ff; --yellow:#fbbf24;
+  --green:#22c55e; --orange:#f97316; --red:#ef4444; --purple:#8b5cf6;
+  --ink:#1f2937; --gray:#6b7280; --line:#e5e7eb; --card:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(circle at 50% 0%,var(--sky) 0%,#ffffff 65%);
+  color:var(--ink); min-height:100vh; padding-bottom:78px;
+}
+#app{max-width:520px;margin:0 auto;padding:18px 16px 20px}
+/* ---------- 通用 ---------- */
+.card{background:var(--card);border-radius:22px;box-shadow:0 6px 18px rgba(59,130,246,.10);padding:16px;margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:999px;
+  padding:11px 20px;font-size:16px;font-weight:700;cursor:pointer;transition:transform .08s,opacity .15s}
+.btn:active{transform:scale(.96)}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:disabled{opacity:.45}
+.btn-g{background:var(--green);color:#fff}
+.btn-o{background:var(--orange);color:#fff}
+.btn-w{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.btn-sm{padding:7px 14px;font-size:14px}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.pill-blue{background:#dbeafe;color:var(--blue-d)}
+.pill-green{background:#dcfce7;color:#15803d}
+.pill-amber{background:#fef3c7;color:#b45309}
+.pill-red{background:#fee2e2;color:#b91c1c}
+.ico{font-size:34px;line-height:1}
+.muted{color:var(--gray)}
+.t-title{font-size:20px;font-weight:800}
+.row{display:flex;align-items:center}
+.between{justify-content:space-between}
+.gap8{gap:8px}.gap12{gap:12px}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+.hidden{display:none !important}
+/* ---------- 首页角色选择 ---------- */
+.head-logo{text-align:center;padding:26px 0 18px}
+.logo-star{font-size:44px;display:inline-block;filter:drop-shadow(0 3px 4px rgba(251,191,36,.5))}
+.app-title{font-size:27px;font-weight:900;letter-spacing:1px;margin-top:2px}
+.app-sub{color:var(--gray);font-size:14px;margin-top:6px}
+.badge-sz{display:inline-block;background:linear-gradient(90deg,#ffd166,#ff8fa3);color:#fff;font-size:11px;
+  font-weight:800;padding:3px 10px;border-radius:999px;margin-left:6px;vertical-align:middle;letter-spacing:.5px}
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 6px}
+.role-card{background:#fff;border-radius:20px;padding:16px 6px 14px;text-align:center;cursor:pointer;
+  box-shadow:0 5px 14px rgba(59,130,246,.10);border:2px solid transparent;transition:border .15s,transform .1s}
+.role-card:active{transform:scale(.95)}
+.role-card:hover{border-color:#bfdbfe}
+.role-ava{font-size:44px;line-height:1.2}
+.role-name{font-weight:800;font-size:17px;margin-top:6px}
+.role-sub{color:var(--gray);font-size:12px;margin-top:3px}
+.tip{text-align:center;color:#9ca3af;font-size:13px;margin-top:14px}
+/* ---------- PIN 页 ---------- */
+.pin-top{display:flex;align-items:center;padding:4px 2px}
+.link-back{color:var(--gray);font-size:15px;background:none;border:none;cursor:pointer;font-weight:600}
+.pin-body{text-align:center;padding-top:26px}
+.pin-ava{font-size:64px}
+.pin-name{font-size:24px;font-weight:900;margin-top:8px}
+.pin-sub{color:var(--gray);font-size:14px;margin-top:4px}
+.dots{display:flex;justify-content:center;gap:16px;margin:26px 0 8px}
+.dot{width:17px;height:17px;border-radius:50%;background:#fff;border:2.5px solid #cbd5e1;transition:all .15s}
+.dot.on{background:var(--blue);border-color:var(--blue)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:300px;margin:20px auto 0}
+.key{height:58px;border-radius:16px;background:#fff;border:2px solid var(--line);font-size:22px;font-weight:700;
+  cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.05);transition:transform .07s}
+.key:active{transform:scale(.93);background:#eff6ff}
+.key-fn{font-size:14px;color:var(--gray);font-weight:600}
+/* ---------- 主界面头部 ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.top-user{display:flex;align-items:center;gap:10px}
+.top-user .ava{width:44px;height:44px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:24px}
+.top-user .nm{font-weight:800;font-size:16px;line-height:1.2}
+.points-chip{background:linear-gradient(90deg,#fef3c7,#fde68a);border:2px solid #fcd34d;color:#92400e;
+  border-radius:999px;padding:6px 12px;font-weight:900;font-size:14px;box-shadow:0 2px 6px rgba(251,191,36,.35)}
+/* ---------- 打卡 ---------- */
+.sec-title{font-size:16px;font-weight:800;margin:4px 2px 10px;display:flex;align-items:center;gap:8px}
+.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.ck{border-radius:18px;padding:14px 12px;background:#fff;border:2px solid var(--line);cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,.04);transition:transform .1s;position:relative}
+.ck:active{transform:scale(.96)}
+.ck.done{background:#f0fdf4;border-color:#86efac;cursor:default}
+.ck .ck-ico{font-size:30px}
+.ck .ck-nm{font-weight:800;font-size:15px;margin-top:4px}
+.ck .ck-pts{color:var(--gray);font-size:12px;margin-top:2px}
+.ck .tick{position:absolute;top:10px;right:10px;color:var(--green);font-size:16px;font-weight:900}
+.streak-bar{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#fff7ed,#ffedd5);
+  border:2px solid #fed7aa;border-radius:16px;padding:10px 14px;margin-bottom:14px}
+.streak-fire{font-size:26px}
+.streak-num{font-size:24px;font-weight:900;color:#c2410c}
+.streak-txt{color:#9a3412;font-size:13px;line-height:1.3}
+/* ---------- 答题 ---------- */
+.quiz-head{font-size:14px;color:var(--gray);font-weight:700}
+.q-card{background:#fff;border-radius:20px;padding:18px;box-shadow:0 6px 18px rgba(59,130,246,.10)}
+.q-sub{display:inline-block;background:#eef2ff;color:#4338ca;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px}
+.q-text{font-size:17px;font-weight:700;line-height:1.6;margin:12px 0 4px;white-space:pre-wrap}
+.q-meta{color:var(--gray);font-size:12px}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.opt{border:2px solid var(--line);background:#fff;border-radius:14px;padding:13px 14px;font-size:16px;
+  cursor:pointer;text-align:left;transition:all .12s;line-height:1.5}
+.opt:active{transform:scale(.985)}
+.opt.correct{border-color:var(--green);background:#f0fdf4;font-weight:800}
+.opt.wrong{border-color:var(--red);background:#fef2f2}
+.opt.disabled{pointer-events:none}
+.expl{background:#fffbeb;border:2px solid #fde68a;border-radius:14px;padding:12px 14px;font-size:14px;color:#78350f;line-height:1.7;margin-top:14px}
+.quiz-result{text-align:center;padding:22px 10px}
+.rz-ico{font-size:54px}
+.rz-txt{font-size:19px;font-weight:900;margin-top:8px}
+/* ---------- 商城 ---------- */
+.shop-item{display:flex;align-items:center;gap:12px;background:#fff;border:2px solid var(--line);border-radius:16px;
+  padding:12px;margin-bottom:10px}
+.shop-ico{font-size:32px;flex:0 0 auto}
+.shop-info{flex:1;min-width:0}
+.shop-nm{font-weight:800;font-size:15px}
+.shop-desc{color:var(--gray);font-size:12px;margin-top:2px}
+.price{font-weight:900;color:#b45309;font-size:15px;white-space:nowrap}
+.price .c{font-size:11px;color:#92400e;margin-right:1px}
+/* ---------- 底部导航 ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);
+  border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:50}
+.tab{flex:1;text-align:center;padding:6px 0;background:none;border:none;cursor:pointer;color:#9ca3af;transition:color .15s}
+.tab .t-ico{font-size:22px;display:block;line-height:1.2}
+.tab .t-lb{font-size:11px;font-weight:700;margin-top:1px}
+.tab.on{color:var(--blue)}
+/* ---------- 列表/流水分组 ---------- */
+.flow-item{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:14px}
+.flow-item:last-child{border-bottom:none}
+.flow-p{color:var(--green);font-weight:800}
+.flow-m{color:var(--red);font-weight:800}
+.list-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 2px;border-bottom:1px dashed var(--line)}
+.list-row:last-child{border-bottom:none}
+/* ---------- 家长后台 ---------- */
+.admin-sec{background:#fff;border-radius:20px;padding:16px;box-shadow:0 6px 18px rgba(59,130,246,.10);margin-bottom:14px}
+.admin-sec .h{font-weight:800;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.inp{border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px;width:100%;background:#fff;color:var(--ink)}
+.inp:focus{outline:none;border-color:var(--blue)}
+label.lb{font-size:13px;font-weight:700;color:var(--gray);display:block;margin:8px 0 4px}
+/* toast */
+#toast{position:fixed;left:50%;top:56px;transform:translateX(-50%);background:rgba(17,24,39,.92);color:#fff;
+  padding:10px 20px;border-radius:999px;font-size:14px;font-weight:700;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;max-width:86%;text-align:center}
+#toast.show{opacity:1}
+/* 弹层 */
+.modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:flex-end;justify-content:center;z-index:80}
+.modal{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:520px;max-height:82vh;overflow-y:auto;padding:20px 18px calc(24px + env(safe-area-inset-bottom))}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ============ 视图：角色选择首页 ============ -->
+<div id="view-home">
+  <div class="head-logo">
+    <span class="logo-star">⭐</span>
+    <div class="app-title">每日打卡 · 积分乐园</div>
+    <div class="app-sub">学习 · 运动 · 知识 · 古诗 · 英语<span class="badge-sz">深圳 · 小升初衔接版</span></div>
+  </div>
+  <div class="role-grid" id="roleGrid"></div>
+  <div class="tip">👆 选择你的头像，输入 4 位密码</div>
+  <div class="tip" style="font-size:11px;color:#d1d5db">数据仅保存在本机浏览器（可导出备份）</div>
+</div>
+
+<!-- ============ 视图：PIN 密码 ============ -->
+<div id="view-pin" class="hidden">
+  <div class="pin-top"><button class="link-back" onclick="go('home')">← 换一个人</button></div>
+  <div class="pin-body">
+    <div class="pin-ava" id="pinAva"></div>
+    <div class="pin-name" id="pinName"></div>
+    <div class="pin-sub" id="pinSub"></div>
+    <div class="dots" id="pinDots"></div>
+    <div class="keypad" id="pinKeys"></div>
+    <div class="tip" id="pinErr" style="color:#dc2626;font-weight:700;min-height:20px"></div>
+  </div>
+</div>
+
+<!-- ============ 视图：主界面 ============ -->
+<div id="view-main" class="hidden">
+  <div class="topbar">
+    <div class="top-user">
+      <div class="ava" id="mAvatar"></div>
+      <div>
+        <div class="nm" id="mName"></div>
+        <div style="font-size:12px;color:var(--gray)" id="mRoleLine"></div>
+      </div>
+    </div>
+    <div class="points-chip">🪙 <span id="mPoints">0</span></div>
+  </div>
+
+  <!-- 打卡 tab -->
+  <div id="tab-checkin">
+    <div class="streak-bar" id="streakBar"></div>
+    <div class="sec-title">📅 今日习惯打卡 <span class="pill pill-blue" id="ckDoneCount">0/5</span></div>
+    <div class="check-grid" id="checkGrid"></div>
+    <div class="card mt16" style="background:#fff7ed;border:2px solid #fed7aa">
+      <div style="font-weight:800;font-size:15px">🧑‍🏫 深圳·小升初衔接贴士</div>
+      <div style="font-size:13px;color:#9a3412;line-height:1.8;margin-top:6px" id="tipBox"></div>
+    </div>
+  </div>
+
+  <!-- 每日一练 tab -->
+  <div id="tab-quiz" class="hidden">
+    <div id="quizMain"></div>
+  </div>
+
+  <!-- 商城 tab -->
+  <div id="tab-shop" class="hidden">
+    <div id="shopBody"></div>
+  </div>
+
+  <!-- 我的 tab -->
+  <div id="tab-mine" class="hidden">
+    <div id="mineBody"></div>
+  </div>
+
+  <!-- 家长后台 tab（家长专属） -->
+  <div id="tab-admin" class="hidden">
+    <div id="adminBody"></div>
+  </div>
+</div>
+
+<!-- ============ 底部导航（孩子） ============ -->
+<div id="tabbar-child" class="tabbar hidden">
+  <button class="tab" data-t="checkin" onclick="switchTab('checkin')"><span class="t-ico">📅</span><span class="t-lb">打卡</span></button>
+  <button class="tab" data-t="quiz" onclick="switchTab('quiz')"><span class="t-ico">✏️</span><span class="t-lb">练一练</span></button>
+  <button class="tab" data-t="shop" onclick="switchTab('shop')"><span class="t-ico">🎁</span><span class="t-lb">商城</span></button>
+  <button class="tab" data-t="mine" onclick="switchTab('mine')"><span class="t-ico">👤</span><span class="t-lb">我的</span></button>
+</div>
+<!-- ============ 底部导航（家长） ============ -->
+<div id="tabbar-parent" class="tabbar hidden">
+  <button class="tab" data-t="checkin" onclick="switchTab('checkin')"><span class="t-ico">📊</span><span class="t-lb">孩子打卡</span></button>
+  <button class="tab" data-t="shop" onclick="switchTab('shop')"><span class="t-ico">🎁</span><span class="t-lb">兑换审核</span></button>
+  <button class="tab" data-t="admin" onclick="switchTab('admin')"><span class="t-ico">🛠️</span><span class="t-lb">后台</span></button>
+  <button class="tab" data-t="mine" onclick="switchTab('mine')"><span class="t-ico">👤</span><span class="t-lb">设置</span></button>
+</div>
+
+<div id="toast"></div>
+<div id="modalRoot"></div>
+</div>
+<script>
+"use strict";
+"use strict";
+/* =====================================================================
+   题库常量：深圳教材对标
+   数学 = 北师大版（六下衔接七上） | 英语 = 沪教牛津版 | 古诗 = 统编教材
+   grade: 6=哥哥·小升初衔接  4=弟弟·四年级同步
+   ===================================================================== */
+const MATH6=[
+{q:"深圳冬天某天温度是零下3℃，记作 -3℃；另一天更冷，是 -8℃。这两天相比，哪一天更冷？",o:["-3℃那天","-8℃那天","一样冷","无法比较"],a:1,p:15,s:"数学 · 负数（北师大六下）",ex:"温度越低越冷。-8 比 -3 更小，在数轴上更靠左，所以 -8℃ 那天更冷。"},
+{q:"-3℃ 比 -8℃ 高多少度？",o:["5℃","11℃","-5℃","3℃"],a:0,p:15,s:"数学 · 负数（北师大六下）",ex:"-3 - (-8) = -3 + 8 = 5，高 5℃。两个负数相减，先变加正数再算。"},
+{q:"在数轴上，-2 和 3 之间相距几个单位长度？",o:["1","5","2","6"],a:1,p:15,s:"数学 · 数轴（七上衔接）",ex:"3 - (-2) = 5。数轴上两点的距离 = 大数减小数。"},
+{q:"|−7| 表示 −7 的绝对值，它的值是？",o:["-7","7","0","14"],a:1,p:15,s:"数学 · 绝对值（七上衔接）",ex:"绝对值表示这个数到原点的距离，一定是非负数，|−7| = 7。"},
+{q:"−5 的相反数是？",o:["5","-5","1/5","0"],a:0,p:15,s:"数学 · 相反数（七上衔接）",ex:"相反数只有符号不同：−5 的相反数是 5。"},
+{q:"一件运动服原价 200 元，商场打八五折，现价是多少元？",o:["185元","160元","170元","150元"],a:2,p:20,s:"数学 · 百分数（北师大六上）",ex:"八五折 = 85%。200 × 85% = 200 × 0.85 = 170 元。"},
+{q:"一个果园今年比去年增产二成五。去年产苹果 4000 kg，今年产多少 kg？",o:["4500kg","5000kg","4250kg","4800kg"],a:1,p:20,s:"数学 · 成数与百分数（北师大六上）",ex:"二成五 = 25%。4000 × (1+25%) = 4000 × 1.25 = 5000 kg。"},
+{q:"解比例：3 : 5 = x : 15，x = ?",o:["5","6","9","10"],a:2,p:20,s:"数学 · 比例（北师大六下）",ex:"内项之积 = 外项之积：3 × 15 = 5 × x，x = 45 ÷ 5 = 9。"},
+{q:"地图比例尺是 1:500000，图上两地相距 4 厘米，实际距离是多少？",o:["2km","20km","200km","40km"],a:1,p:20,s:"数学 · 比例尺（北师大六下）",ex:"4 × 500000 = 2000000 厘米 = 20 千米。换算：2000000÷100000=20。"},
+{q:"底面积 12 平方厘米、高 5 厘米的圆柱，体积是多少？（π 取 3.14 的题用公式 V=Sh）",o:["60cm³","17cm³","600cm³","36cm³"],a:0,p:20,s:"数学 · 圆柱体积（北师大六下）",ex:"V = 底面积 × 高 = 12 × 5 = 60 cm³。圆柱体积不用乘 π，因为底面积已给出。"},
+{q:"一个圆柱体积是 36 cm³，与它等底等高的圆锥体积是多少？",o:["12cm³","18cm³","36cm³","108cm³"],a:0,p:20,s:"数学 · 圆锥体积（北师大六下）",ex:"等底等高的圆锥体积是圆柱的 1/3：36 ÷ 3 = 12 cm³。"},
+{q:"下面哪组量成反比例关系？",o:["路程一定，速度与时间","速度一定，路程与时间","单价一定，总价与数量","年龄与身高"],a:0,p:20,s:"数学 · 正反比例（北师大六下）",ex:"路程 = 速度 × 时间。路程一定时，速度越大时间越短，乘积不变，成反比例。"},
+{q:"计算：(−3) + (−5) = ?",o:["8","-8","2","-2"],a:1,p:15,s:"数学 · 有理数运算（七上衔接）",ex:"同号相加，取相同符号：−3 + (−5) = −8。"},
+{q:"计算：(−2) × (−6) = ?",o:["-12","12","8","-8"],a:1,p:15,s:"数学 · 有理数乘除（七上衔接）",ex:"负负得正：(−2)×(−6) = 12。"},
+{q:"计算：−4 − (−7) = ?",o:["3","-3","11","-11"],a:0,p:15,s:"数学 · 有理数运算（七上衔接）",ex:"减去一个数等于加上它的相反数：−4 + 7 = 3。"},
+{q:"计算：(−2)² 的值是？",o:["-4","4","-2","2"],a:1,p:15,s:"数学 · 有理数乘方（七上衔接）",ex:"(−2)² = (−2)×(−2) = 4。注意 −2² 才是 −4。"},
+{q:"比较 −1/2 和 −1/3 的大小，正确的是？",o:["−1/2 > −1/3","−1/3 > −1/2","一样大","无法比较"],a:1,p:15,s:"数学 · 负数比较（七上衔接）",ex:"负数中绝对值大的反而小：|−1/2| = 0.5 > |−1/3| ≈ 0.33，所以 −1/3 > −1/2。"},
+{q:"合并同类项：3a + 2a = ?",o:["5a","5a²","6a","a"],a:0,p:15,s:"数学 · 整式入门（北师大七上）",ex:"字母部分相同就是同类项，系数相加：3a + 2a = (3+2)a = 5a。"},
+{q:"去掉括号：−(2x − 1) = ?",o:["-2x + 1","-2x - 1","2x + 1","2x - 1"],a:0,p:15,s:"数学 · 整式与去括号（北师大七上）",ex:"括号前是负号，去括号后每一项都变号：−(2x−1) = −2x + 1。"},
+{q:"解方程：2x + 3 = 11，x = ?",o:["4","7","5","6"],a:0,p:20,s:"数学 · 一元一次方程（北师大七上）",ex:"2x = 11 − 3 = 8，x = 8 ÷ 2 = 4。小升初重点：移项要变号。"},
+{q:"解方程：5x − 2 = 3x + 8，x = ?",o:["5","4","6","3"],a:0,p:20,s:"数学 · 一元一次方程（北师大七上）",ex:"移项：5x − 3x = 8 + 2，2x = 10，x = 5。"},
+{q:"两圆的半径比是 2:3，它们的面积比是？",o:["2:3","4:6","4:9","8:27"],a:2,p:20,s:"数学 · 圆面积与比（北师大六上）",ex:"面积与半径的平方成正比：2²:3² = 4:9。"},
+{q:"用简便方法算：25 × 44 = ?",o:["1000","1100","1050","900"],a:1,p:15,s:"数学 · 简便运算（北师大四下+衔接）",ex:"44 = 4 × 11，25×44 = 25×4×11 = 100×11 = 1100。"},
+{q:"用简便方法算：99 × 87 = ?",o:["8613","8523","8700","8610"],a:0,p:20,s:"数学 · 乘法分配律（小升初高频）",ex:"99×87 = (100−1)×87 = 8700 − 87 = 8613。"},
+{q:"比较 3/4 和 2/3 的大小，正确的是？",o:["3/4 > 2/3","3/4 < 2/3","一样大","无法比较"],a:0,p:15,s:"数学 · 分数比较（北师大五下）",ex:"通分：3/4 = 9/12，2/3 = 8/12，9/12 > 8/12，所以 3/4 > 2/3。"},
+{q:"计算：3/5 ÷ 2 = ?",o:["3/10","6/5","3/7","1/3"],a:0,p:15,s:"数学 · 分数除法（北师大五下）",ex:"除以一个数等于乘它的倒数：3/5 ÷ 2 = 3/5 × 1/2 = 3/10。"},
+{q:"半径为 5 厘米的圆，周长是多少？（π 取 3.14）",o:["15.7cm","31.4cm","78.5cm","25cm"],a:1,p:15,s:"数学 · 圆周长（北师大六上）",ex:"C = 2πr = 2 × 3.14 × 5 = 31.4 厘米。"},
+{q:"三角形的三个内角分别是 50°、60°，第三个角是多少度？",o:["60°","70°","80°","90°"],a:1,p:15,s:"数学 · 三角形内角和（北师大四下）",ex:"三角形内角和 180°：180 − 50 − 60 = 70°。"},
+{q:"长方体的长 5cm、宽 4cm、高 3cm，它的棱长总和是多少？",o:["48cm","60cm","24cm","12cm"],a:0,p:15,s:"数学 · 长方体棱长（北师大五下）",ex:"每组棱有 4 条：(5+4+3) × 4 = 12 × 4 = 48 厘米。"},
+{q:"按规律填数：2, 6, 12, 20, 30, （ ）",o:["40","42","44","36"],a:1,p:20,s:"数学 · 找规律（小升初思维）",ex:"相邻差依次为 4、6、8、10，下一个差是 12：30 + 12 = 42。"},
+{q:"鸡兔同笼：笼中共 35 个头、94 只脚，兔有多少只？",o:["12只","23只","10只","14只"],a:0,p:25,s:"数学 · 鸡兔同笼（小升初思维）",ex:"假设全是鸡：35×2=70 脚，差 94−70=24 脚；每只兔比鸡多 2 脚：24÷2=12 只兔。"},
+{q:"一瓶盐水 100 克，其中含盐 25 克，含盐率是？",o:["25%","20%","2.5%","75%"],a:0,p:15,s:"数学 · 百分率（北师大六上）",ex:"含盐率 = 盐 ÷ 盐水 = 25 ÷ 100 = 25%。注意盐水=盐+水。"},
+{q:"小明从家到学校要走 1200 米，每分钟走 80 米，需要几分钟？",o:["12分","15分","20分","10分"],a:1,p:15,s:"数学 · 行程基础（北师大四下）",ex:"时间 = 路程 ÷ 速度 = 1200 ÷ 80 = 15 分钟。"},
+{q:"五个数的平均数是 8，它们的总和是？",o:["40","13","8","45"],a:0,p:10,s:"数学 · 平均数（北师大四下）",ex:"总和 = 平均数 × 个数 = 8 × 5 = 40。"},
+];
+/* === ENG6 题库：英语（沪教牛津 · 含深圳印象） === */
+const ENG6=[
+{q:"She ___ to school by bus every day.",o:["go","goes","going","went"],a:1,p:15,s:"英语 · 一般现在时",ex:"every day 是标志词；主语 She 是第三人称单数，动词加 s 变为 goes。"},
+{q:"Look! The children ___ football in the playground.",o:["play","plays","are playing","played"],a:2,p:15,s:"英语 · 现在进行时",ex:"Look! 提示动作正在进行，用 be + doing，答案为 are playing。"},
+{q:"There ___ some milk in the glass.",o:["is","are","be","am"],a:0,p:15,s:"英语 · There be 句型",ex:"milk 是不可数名词，be 动词用 is。"},
+{q:"This is ___ book. It is not yours.",o:["my","me","I","mine"],a:0,p:15,s:"英语 · 物主代词",ex:"book 是名词，前面要用形容词性物主代词 my；mine 后不接名词。"},
+{q:"I usually get up ___ half past six in the morning.",o:["in","on","at","for"],a:2,p:15,s:"英语 · 时间介词",ex:"具体时刻前用 at；in 用于月/年/早中晚，on 用于星期/日期。"},
+{q:"There are two ___ in the room. They are playing chess.",o:["child","childs","children","childrens"],a:2,p:15,s:"英语 · 名词复数",ex:"child 的复数是不规则变化 children，不能直接加 s。"},
+{q:"— ___ do you go to Shenzhen Bay Park? — By metro.",o:["What","How","When","Where"],a:1,p:15,s:"英语 · 特殊疑问词",ex:"回答 By metro 表示方式，问方式用 How。"},
+{q:"Which city is ___ , Shenzhen or Guangzhou?",o:["big","bigger","biggest","more big"],a:1,p:15,s:"英语 · 比较级",ex:"两者之间比较用比较级 bigger；三者以上才用最高级。"},
+{q:"— Can you tell me the way to the library? — Go straight and ___.",o:["turn left","turns left","turning left","to turn"],a:0,p:15,s:"英语 · 祈使句",ex:"祈使句用动词原形开头：Go straight and turn left."},
+{q:"My sister ___ like milk. She likes juice.",o:["does not","do not","is not","not"],a:0,p:15,s:"英语 · 否定句",ex:"主语 My sister 是第三人称单数，否定用 does not + 动词原形。"},
+{q:"— What time is it now? — ___",o:["It is seven","I am seven","There are seven","It has seven"],a:0,p:15,s:"英语 · 时间表达",ex:"问几点用 What time is it?，回答 It is + 时间。"},
+{q:"How many ___ are there in your school? — About two thousand.",o:["student","students","a student","the student"],a:1,p:15,s:"英语 · How many 句型",ex:"How many 后接可数名词复数：students。"},
+{q:"We must ___ the traffic lights when we cross the road.",o:["look at","look for","look after","look up"],a:0,p:15,s:"英语 · 动词短语",ex:"过马路要看交通灯，look at 表示看；must 后接动词原形。"},
+{q:"【深圳印象】Shenzhen is also called Pengcheng. It is famous for its ___ city.",o:["green","grey","orange","purple"],a:0,p:15,s:"英语 · 深圳印象",ex:"深圳被称为鹏城，以绿色生态闻名，森林覆盖率在特大城市中领先。"},
+{q:"【深圳印象】Which place can you enjoy the sea view at in Shenzhen?",o:["Shenzhen Bay Park","Huaqiangbei","Dafen Village","Ping Shan"],a:0,p:15,s:"英语 · 深圳印象",ex:"深圳湾公园是深圳著名的海滨公园，可以看海景。"},
+{q:"【深圳印象】The tallest building in Shenzhen is ___.",o:["Ping An Finance Centre","KK100","China Resources Headquarters","Diwang Mansion"],a:0,p:15,s:"英语 · 深圳印象",ex:"平安金融中心高 592.5 米，是深圳第一高楼。"},
+{q:"【深圳印象】Many people in Shenzhen go to work by ___. It is fast and convenient.",o:["metro","horse","plane","ship"],a:0,p:15,s:"英语 · 深圳印象",ex:"深圳地铁网络发达，是市民出行的重要方式。"},
+{q:"Tomorrow is Sunday. We ___ go to the museum.",o:["will","are","were","did"],a:0,p:15,s:"英语 · 一般将来时",ex:"Tomorrow 是一般将来时标志，用 will + 动词原形。"},
+{q:"— ___ apples do you want? — Six, please.",o:["How much","How many","How old","How long"],a:1,p:15,s:"英语 · 询问数量",ex:"apples 是可数名词复数，问数量用 How many。"},
+{q:"This pair of shoes ___ very nice. I like it.",o:["is","are","be","am"],a:0,p:15,s:"英语 · 主谓一致",ex:"This pair of shoes 的中心词是 pair，谓语用 is。"},
+{q:"【深圳印象】— Where is the nearest metro station? — It is ___ the park.",o:["next to","on","under","at night"],a:0,p:15,s:"英语 · 方位介词",ex:"next to 表示在旁边，是问路常用句型。"},
+];
+/* === POEM6 题库：古诗文（统编教材·小升初衔接） === */
+const POEM6=[
+{q:"《观沧海》中「东临碣石，以观沧海」的作者是谁？",o:["曹操","曹植","李白","王维"],a:0,p:15,s:"古诗 · 七年级上册",ex:"《观沧海》是东汉曹操所作，是七上第一篇古诗文，小升初暑假背诵正合适。"},
+{q:"「日月之行，若出其中；星汉灿烂，若出其里」出自哪首诗？",o:["《观沧海》","《次北固山下》","《望岳》","《登飞来峰》"],a:0,p:15,s:"古诗 · 七年级上册",ex:"这两句出自曹操《观沧海》，借大海抒写博大胸襟。"},
+{q:"《次北固山下》「海日生残夜」的下一句是？",o:["江春入旧年","长歌怀采薇","归雁洛阳边","风正一帆悬"],a:0,p:15,s:"古诗 · 七年级上册",ex:"海日生残夜，江春入旧年，蕴含新旧交替的哲理，是千古名句。"},
+{q:"《闻王昌龄左迁龙标遥有此寄》「我寄愁心与明月」的下一句是？",o:["随君直到夜郎西","闻道龙标过五溪","杨花落尽子规啼","影入平羌江水流"],a:0,p:15,s:"古诗 · 七年级上册",ex:"李白把愁心托付明月，随友人一直到夜郎西，表达牵挂之情。"},
+{q:"《论语》中「学而不思则罔」的下一句是？",o:["思而不学则殆","不亦说乎","可以为师矣","必有我师焉"],a:0,p:15,s:"古诗文 · 七年级上册",ex:"学与思要结合：只学不思会迷惑，只思不学则危险。"},
+{q:"《天净沙·秋思》「夕阳西下，断肠人在天涯」的作者是谁？",o:["马致远","白朴","关汉卿","张养浩"],a:0,p:15,s:"古诗 · 七年级上册",ex:"《天净沙·秋思》作者马致远，被誉为秋思之祖。"},
+{q:"《长歌行》中「少壮不努力」的下一句是？",o:["老大徒伤悲","粒粒皆辛苦","更上一层楼","万紫千红总是春"],a:0,p:15,s:"古诗 · 小学必背",ex:"少壮不努力，老大徒伤悲，劝人珍惜时光，作文常用。"},
+{q:"《石灰吟》「粉骨碎身浑不怕，要留清白在人间」的作者是？",o:["于谦","王冕","郑燮","王安石"],a:0,p:15,s:"古诗 · 小学必背",ex:"《石灰吟》作者于谦，借石灰言志，勿与《竹石》作者郑燮混淆。"},
+{q:"《竹石》中「千磨万击还坚劲」的下一句是？",o:["任尔东西南北风","咬定青山不放松","立根原在破岩中","要留清白在人间"],a:0,p:15,s:"古诗 · 小学必背",ex:"千磨万击还坚劲，任尔东西南北风，郑燮借竹言志。"},
+{q:"《己亥杂诗》中「落红不是无情物」的下一句是？",o:["化作春泥更护花","不拘一格降人才","吟鞭东指即天涯","浩荡离愁白日斜"],a:0,p:15,s:"古诗 · 小学必背",ex:"落红不是无情物，化作春泥更护花，龚自珍表达奉献精神。"},
+{q:"《望岳》中「会当凌绝顶」的下一句是？",o:["一览众山小","决眦入归鸟","齐鲁青未了","阴阳割昏晓"],a:0,p:15,s:"古诗 · 七年级上册",ex:"会当凌绝顶，一览众山小，杜甫写泰山与豪情。"},
+{q:"《登飞来峰》中「不畏浮云遮望眼」的下一句是？",o:["自缘身在最高层","只缘身在此山中","闻说鸡鸣见日升","飞来山上千寻塔"],a:0,p:15,s:"古诗 · 七年级上册",ex:"不畏浮云遮望眼，自缘身在最高层，王安石借景说理：站得高看得远。"},
+];
+/* === MATH4 题库：弟弟四年级同步（北师大版） === */
+const MATH4=[
+{q:"7008000 读作什么？",o:["七百万八千","七千零八万","七百万零八千","七千八百万"],a:0,p:10,s:"数学 · 大数的认识（北师大四上）",ex:"7008000 分级：700 | 8000，读作七百万八千。"},
+{q:"比较大小：2080500 ○ 2085000，应填？",o:["<",">","=","无法比较"],a:0,p:10,s:"数学 · 大数比较（北师大四上）",ex:"位数相同从高位比，万位都是 208，千位 0 < 5，所以 2080500 更小。"},
+{q:"5000000 改写成以「万」为单位的数是？",o:["500万","50万","5000万","5万"],a:0,p:10,s:"数学 · 数的改写（北师大四上）",ex:"5000000 = 500 万，去掉 4 个 0 加万字。"},
+{q:"125 × 8 = ?",o:["1000","900","1100","1200"],a:0,p:10,s:"数学 · 口算乘法（北师大四上）",ex:"125 × 8 = 1000，这是常考的简便运算好搭档。"},
+{q:"720 ÷ 8 = ?",o:["90","80","92","70"],a:0,p:10,s:"数学 · 除法（北师大四上）",ex:"72 ÷ 8 = 9，所以 720 ÷ 8 = 90。"},
+{q:"用简便方法计算：25 × (4 × 13) = ?",o:["1300","130","1200","2600"],a:0,p:15,s:"数学 · 乘法结合律（北师大四上）",ex:"25 × 4 = 100，100 × 13 = 1300。"},
+{q:"37 + 59 + 63，怎样算最简便？",o:["(37+59)+63","(37+63)+59","59+(37+63)","(37+63)×59"],a:1,p:10,s:"数学 · 加法交换律（北师大四上）",ex:"37 和 63 先加得 100，再加 59 得 159。B 与 C 都对，核心是先凑整。"},
+{q:"下面哪个图形没有端点？",o:["直线","线段","射线","角"],a:0,p:10,s:"数学 · 线的认识（北师大四上）",ex:"直线可以向两端无限延伸，没有端点；线段有两个端点，射线有一个端点。"},
+{q:"一个直角等于多少度？",o:["90°","180°","45°","360°"],a:0,p:10,s:"数学 · 角的度量（北师大四上）",ex:"直角 = 90°，平角 = 180°，周角 = 360°。"},
+{q:"黑板相对的两条边是什么位置关系？",o:["互相平行","互相垂直","相交","重合"],a:0,p:10,s:"数学 · 平行与垂直（北师大四上）",ex:"黑板上下两条边、左右两条边都互相平行。"},
+{q:"地图上通常按什么规则定方向？",o:["上北下南，左西右东","上南下北，左东右西","上北下南，左东右西","上东下西，左北右南"],a:0,p:10,s:"数学 · 方向与位置（北师大四上）",ex:"地图方向口诀：上北下南，左西右东。"},
+{q:"120 分 = ？小时",o:["2","1.5","3","2.5"],a:0,p:10,s:"数学 · 时间单位（北师大四下）",ex:"1 小时 = 60 分，120 ÷ 60 = 2 小时。"},
+{q:"一辆汽车每小时行 60 千米，2 小时行多少千米？",o:["120千米","30千米","62千米","180千米"],a:0,p:10,s:"数学 · 路程时间速度（北师大四下）",ex:"路程 = 速度 × 时间 = 60 × 2 = 120 千米。"},
+{q:"738 ÷ 6 = ?",o:["123","132","113","128"],a:0,p:10,s:"数学 · 三位数除以一位数（北师大三下）",ex:"700÷6 有余，看成 738÷6：6×123=738。"},
+{q:"计算：100 − 25 × 3 = ?",o:["25","225","75","0"],a:0,p:10,s:"数学 · 混合运算（北师大四下）",ex:"先算乘除后算加减：100 − 75 = 25。"},
+{q:"正方形边长 6 厘米，周长是多少？",o:["24厘米","36厘米","12厘米","30厘米"],a:0,p:10,s:"数学 · 周长（北师大三下）",ex:"正方形周长 = 边长 × 4 = 6 × 4 = 24 厘米。"},
+{q:"长方形长 5 厘米、宽 3 厘米，面积是多少？",o:["15平方厘米","16平方厘米","8平方厘米","30平方厘米"],a:0,p:10,s:"数学 · 面积（北师大三下）",ex:"长方形面积 = 长 × 宽 = 5 × 3 = 15 平方厘米。"},
+{q:"估算：49 × 51 大约等于？",o:["2500","2000","3000","3500"],a:0,p:10,s:"数学 · 估算（北师大四上）",ex:"49 ≈ 50，51 ≈ 50，50 × 50 = 2500。"},
+{q:"把一根绳子平均分成 6 段，每段是它的几分之几？",o:["1/6","1/5","6/1","1/3"],a:0,p:10,s:"数学 · 分数的认识（北师大三下）",ex:"平均分成 6 份，每份是整体的 1/6。"},
+{q:"小明 8:20 出发去公园，路上用了 25 分钟，几点到达？",o:["8:45","8:50","9:00","8:55"],a:0,p:15,s:"数学 · 时间的计算（北师大三下）",ex:"8:20 + 25 分 = 8:45。"},
+];
+/* === ENG4 题库：弟弟四年级英语（沪教牛津） === */
+const ENG4=[
+{q:"早上见到老师，你应该说：",o:["Good morning!","Good night!","Goodbye!","See you!"],a:0,p:10,s:"英语 · 日常问候（沪教牛津三上）",ex:"上午见面用 Good morning；Good night 是晚上道别用。"},
+{q:"— How many pencils do you have? — ___",o:["Three","Blue","Yes","Thank you"],a:0,p:10,s:"英语 · How many（沪教牛津三下）",ex:"问有多少支铅笔，回答数量 Three。"},
+{q:"This is ___ apple. It is red.",o:["a","an","the","/"],a:1,p:10,s:"英语 · 冠词（沪教牛津三下）",ex:"apple 以元音音素开头，用 an。"},
+{q:"I have two ___.",o:["hand","hands","a hand","handes"],a:1,p:10,s:"英语 · 名词复数（沪教牛津三下）",ex:"two 后接复数，hand 的复数是 hands（直接加 s）。"},
+{q:"— What colour is the sky? — It is ___.",o:["blue","green","black","yellow"],a:0,p:10,s:"英语 · 颜色（沪教牛津三上）",ex:"天空是蓝色的，答 blue。"},
+{q:"My father is my mother\'s ___.",o:["husband","son","brother","uncle"],a:0,p:10,s:"英语 · 家庭称呼（沪教牛津三上）",ex:"爸爸是妈妈的丈夫 husband；son 是儿子。"},
+{q:"I ___ a student. She ___ a teacher.",o:["am, is","is, am","am, are","are, is"],a:0,p:10,s:"英语 · be 动词（沪教牛津三上）",ex:"I 用 am，第三人称 She 用 is。"},
+{q:"He ___ apples very much.",o:["likes","like","liking","is like"],a:0,p:10,s:"英语 · 一般现在时（沪教牛津四下）",ex:"主语 He 是第三人称单数，动词加 s：likes。"},
+{q:"— Can you swim? — Yes, ___.",o:["I can","I do","I am","I have"],a:0,p:10,s:"英语 · Can 句型（沪教牛津三下）",ex:"Can 提问用 can 回答：Yes, I can."},
+{q:"What time is it? It is ___.",o:["seven clock","seven o\'clock","o\'clock seven","seven time"],a:1,p:10,s:"英语 · 时间表达（沪教牛津三下）",ex:"整点表达为数字 + o\'clock：seven o\'clock。"},
+{q:"Please ___ the door. It is hot.",o:["open","close","opens","closing"],a:0,p:10,s:"英语 · 祈使句（沪教牛津四下）",ex:"天热请开门，祈使句动词用原形 open。"},
+{q:"The cat is ___ the box. (猫在盒子里)",o:["in","on","under","behind"],a:0,p:10,s:"英语 · 方位介词（沪教牛津三下）",ex:"在盒子里面用 in。"},
+{q:"— ___ is your name? — My name is Tom.",o:["What","How","Where","Who"],a:0,p:10,s:"英语 · 特殊疑问词（沪教牛津三上）",ex:"问名字用 What is your name?"},
+{q:"We go to school ___ Monday to Friday.",o:["from","at","in","on"],a:0,p:10,s:"英语 · 介词（沪教牛津四下）",ex:"from...to... 表示从……到……，周一到周五上学。"},
+{q:"It is ___ today. Let us fly a kite.",o:["windy","rainy","snowy","cloudy"],a:0,p:10,s:"英语 · 天气（沪教牛津四下）",ex:"放风筝需要风，所以是 windy（有风的）。"},
+{q:"— Do you like pandas? — ___. They are cute.",o:["Yes, I do","Yes, I am","No, I do not","Yes, I like"],a:0,p:10,s:"英语 · Do 问句（沪教牛津四下）",ex:"Do you like...? 用 Yes, I do / No, I do not 回答。"},
+];
+/* === POEM4 题库：弟弟古诗（统编小学必背） === */
+const POEM4=[
+{q:"《静夜思》「床前明月光」的作者是？",o:["李白","杜甫","白居易","王维"],a:0,p:10,s:"古诗 · 小学必背",ex:"《静夜思》作者李白，写游子思乡之情。"},
+{q:"《静夜思》中「床前明月光」的下一句是？",o:["疑是地上霜","低头思故乡","举头望明月","月是故乡明"],a:0,p:10,s:"古诗 · 小学必背",ex:"床前明月光，疑是地上霜——把月光比作地上的霜。"},
+{q:"《春晓》「春眠不觉晓」的作者是？",o:["孟浩然","王昌龄","贺知章","杜牧"],a:0,p:10,s:"古诗 · 小学必背",ex:"《春晓》作者孟浩然，写春天早晨的景色。"},
+{q:"《咏鹅》「曲项向天歌」的作者是？",o:["骆宾王","李白","白居易","李绅"],a:0,p:10,s:"古诗 · 小学必背",ex:"《咏鹅》是骆宾王七岁时写的诗。"},
+{q:"《登鹳雀楼》「欲穷千里目」的下一句是？",o:["更上一层楼","黄河入海流","白日依山尽","一览众山小"],a:0,p:10,s:"古诗 · 小学必背",ex:"欲穷千里目，更上一层楼——想看得更远就要站得更高。"},
+{q:"《悯农》「谁知盘中餐」的下一句是？",o:["粒粒皆辛苦","汗滴禾下土","春种一粒粟","秋收万颗子"],a:0,p:10,s:"古诗 · 小学必背",ex:"谁知盘中餐，粒粒皆辛苦——珍惜粮食。"},
+{q:"《草》「野火烧不尽」的下一句是？",o:["春风吹又生","一岁一枯荣","离离原上草","更上一层楼"],a:0,p:10,s:"古诗 · 小学必背",ex:"野火烧不尽，春风吹又生——赞美小草顽强的生命力。"},
+{q:"《咏柳》「不知细叶谁裁出」的作者是？",o:["贺知章","李白","王之涣","孟浩然"],a:0,p:10,s:"古诗 · 小学必背",ex:"《咏柳》作者贺知章，他把春风比作剪刀。"},
+{q:"《望庐山瀑布》「飞流直下三千尺」的下一句是？",o:["疑是银河落九天","遥看瀑布挂前川","日照香炉生紫烟","不识庐山真面目"],a:0,p:10,s:"古诗 · 小学必背",ex:"飞流直下三千尺，疑是银河落九天——用夸张写瀑布的壮观。"},
+{q:"《绝句》「两个黄鹂鸣翠柳」的作者是？",o:["杜甫","李白","苏轼","杨万里"],a:0,p:10,s:"古诗 · 小学必背",ex:"两个黄鹂鸣翠柳，一行白鹭上青天，作者杜甫。"},
+];
+/* ============ 题库聚合与按年级取题 ============ */
+const BANKS={6:{math:MATH6,eng:ENG6,poem:POEM6},4:{math:MATH4,eng:ENG4,poem:POEM4}};
+function pickQ(list,seed){const d=new Date();const day=Math.floor(d.getTime()/86400000);const idx=(day*7+seed*13+list.length)%list.length;return list[idx];}
+/* ================= 配置与默认数据 ================= */
+const LS_KEY="familyCheckinSZ_v1";
+const CK_CATS=[
+ {id:"study",nm:"学习",ico:"📚",tip:"写作业 / 预习 / 复习"},
+ {id:"sport",nm:"运动",ico:"⚽",tip:"跳绳 / 跑步 / 球类 30 分钟"},
+ {id:"know",nm:"知识",ico:"🔬",tip:"看科普书 / 纪录片 / 新闻"},
+ {id:"poem",nm:"古诗",ico:"📜",tip:"背默一首古诗"},
+ {id:"eng",nm:"英语",ico:"🗣️",tip:"听读英语 15 分钟"},
+];
+const CK_PTS=10, CK_BONUS=20, STREAK_BONUS=50;
+const DEF_USERS=[
+ {uid:"parent",name:"家长",role:"parent",grade:0,emoji:"👨‍👩‍👧‍👦",sub:"家长后台",pin:"1111"},
+ {uid:"bro",name:"哥哥",role:"kid",grade:6,emoji:"👦",sub:"小升初冲刺 · 北师大数学+沪教牛津",pin:"2222"},
+ {uid:"sis",name:"弟弟",role:"kid",grade:4,emoji:"🧒",sub:"四年级同步 · 深圳教材",pin:"3333"},
+];
+const DEF_REWARDS=[
+ {id:1,ico:"📱",nm:"玩手机 30 分钟",price:80,on:1},
+ {id:2,ico:"🎮",nm:"玩游戏 1 小时",price:150,on:1},
+ {id:3,ico:"🍦",nm:"冰淇淋一个",price:50,on:1},
+ {id:4,ico:"🧸",nm:"小玩具（自选）",price:300,on:1},
+ {id:5,ico:"🏞️",nm:"周末去公园野餐",price:200,on:1},
+ {id:6,ico:"📖",nm:"买一本喜欢的书",price:180,on:1},
+];
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function yesterdayStr(){const d=new Date(Date.now()-86400000);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function blankUser(u){return {uid:u.uid,name:u.name,role:u.role,grade:u.grade,emoji:u.emoji,sub:u.sub,pin:u.pin,points:0,
+  streak:0,lastCk:"",fullDays:0,ck:{},quizDone:"",quizCorrect:0,quizTotal:0,quizGot:0,flows:[],redeems:[]};}
+/* ---------- 存储 ---------- */
+let DB=null;
+function loadDB(){try{const raw=localStorage.getItem(LS_KEY);if(raw){DB=JSON.parse(raw);}else{DB=null;}}catch(e){DB=null;}
+ if(!DB){DB={rewards:DEF_REWARDS.slice(),users:{}};DEF_USERS.forEach(function(u){DB.users[u.uid]=blankUser(u);});saveDB();}}
+function saveDB(){try{localStorage.setItem(LS_KEY,JSON.stringify(DB));}catch(e){toast("存储失败：请检查浏览器存储空间");}}
+function user(uid){uid=uid||CUR;return DB.users[uid];}
+function addFlow(u,pts,note){u.flows.unshift({t:Date.now(),pts:pts,note:note});u.flows=u.flows.slice(0,200);}
+function setPoints(u,delta,note){u.points+=delta;if(u.points<0)u.points=0;addFlow(u,delta,note);saveDB();}
+/* ================= 全局视图状态 ================= */
+let CUR=null;       // 当前登录 uid
+let PIN_UID=null;   // 正在输密码的角色
+let TAB="checkin";  // 当前 tab
+let QUIZ_STATE=null;// 答题会话
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+/* ================= 视图切换 ================= */
+function go(v){
+  $("view-home").classList.toggle("hidden",v!=="home");
+  $("view-pin").classList.toggle("hidden",v!=="pin");
+  $("view-main").classList.toggle("hidden",v!=="main");
+  if(v==="home")renderHome();
+  if(v==="pin")renderPin();
+}
+function renderHome(){
+  let h="";
+  const order=["parent","bro","sis"];
+  order.forEach(function(uid){
+    const u=DB.users[uid];if(!u)return;
+    h+='<div class="role-card" onclick="openPin(\''+uid+'\')"><div class="role-ava">'+u.emoji+'</div>'
+      +'<div class="role-name">'+esc(u.name)+'</div><div class="role-sub">'+esc(u.sub)+'</div></div>';
+  });
+  $("roleGrid").innerHTML=h;
+}
+/* ================= PIN ================= */
+let pinBuf="";
+function openPin(uid){
+  PIN_UID=uid;pinBuf="";
+  const u=user(uid);
+  $("pinAva").textContent=u.emoji;$("pinName").textContent=u.name;
+  $("pinSub").textContent=u.sub;$("pinErr").textContent="";
+  drawPinDots();renderPinKeys();go("pin");
+}
+function renderPinKeys(){
+  const ks=[["1","2","3"],["4","5","6"],["7","8","9"],[["清空","C"],["0","0"],["⌫","B"]]];
+  let h="";
+  ks.forEach(function(row){
+    row.forEach(function(k){
+      const lb=Array.isArray(k)?k[0]:k,val=Array.isArray(k)?k[1]:k;
+      const cls=(val==="C"||val==="B")?"key key-fn":"key";
+      h+='<button class="'+cls+'" onclick="pinKey(\''+val+'\')">'+lb+'</button>';
+    });
+  });
+  $("pinKeys").innerHTML=h;
+}
+function drawPinDots(){
+  let h="";for(let i=0;i<4;i++){h+='<div class="dot'+(i<pinBuf.length?" on":"")+'"></div>';}
+  $("pinDots").innerHTML=h;
+}
+function pinKey(k){
+  if(k==="C"){pinBuf="";}
+  else if(k==="B"){pinBuf=pinBuf.slice(0,-1);}
+  else{if(pinBuf.length<4)pinBuf+=k;}
+  drawPinDots();
+  if(pinBuf.length===4){
+    const u=user(PIN_UID);
+    if(u.pin===pinBuf){enterApp(PIN_UID);}
+    else{$("pinErr").textContent="密码不对哦，再试一次";setTimeout(function(){pinBuf="";drawPinDots();},600);}
+  }
+}
+/* ================= 进入 / 退出 ================= */
+function enterApp(uid){
+  CUR=uid;TAB="checkin";
+  const u=user(uid);
+  $("mAvatar").textContent=u.emoji;$("mName").textContent=u.name;
+  $("mRoleLine").textContent=u.sub;
+  $("tabbar-child").classList.toggle("hidden",u.role!=="kid");
+  $("tabbar-parent").classList.toggle("hidden",u.role!=="parent");
+  go("main");switchTab(u.role==="kid"?"checkin":"checkin");
+}
+function logout(){CUR=null;PIN_UID=null;go("home");}
+function refreshTop(){
+  const u=user(CUR);$("mPoints").textContent=u.points;
+  $("mAvatar").textContent=u.emoji;$("mName").textContent=u.name;
+}
+/* ================= Tab 切换 ================= */
+function switchTab(t){
+  if(!CUR)return;TAB=t;
+  const u=user(CUR);
+  ["checkin","quiz","shop","mine","admin"].forEach(function(k){$("tab-"+k).classList.toggle("hidden",k!==t);});
+  const bar=u.role==="kid"?$("tabbar-child"):$("tabbar-parent");
+  Array.prototype.forEach.call(bar.querySelectorAll(".tab"),function(b){
+    b.classList.toggle("on",b.getAttribute("data-t")===t);
+  });
+  if(t==="checkin")renderCheckin();
+  if(t==="quiz"&&u.role==="kid")renderQuiz();
+  if(t==="shop")renderShop();
+  if(t==="mine")renderMine();
+  if(t==="admin")renderAdmin();
+  window.scrollTo(0,0);
+}
+/* ================= 打卡页 ================= */
+const SZ_TIPS=[
+ "深圳小升初数学用北师大版：六下重点「负数·比例·圆柱圆锥」，七上衔接「有理数·一元一次方程」。",
+ "深圳小学英语用沪教牛津版，2025 新版加入「深圳印象」单元：多积累地铁、公园、地标等生活词汇。",
+ "语文古诗文全国统一用部编教材：小学必背 75 首，初一新增《观沧海》《论语十二章》等，暑假先背起来。",
+ "小升初衔接期每天建议：数学 40 分钟 + 英语 20 分钟 + 阅读 20 分钟，比刷题更重要的是坚持。",
+ "哥哥可关注深圳四大名校（深中/实验/外校/高级）小升初活动，注重数学思维与英语表达。",
+];
+function renderCheckin(){
+  const u=user(CUR);
+  if(u.role==="parent"){renderParentCheckin();return;}
+  const tipCard=$("tipBox").parentElement;
+  if(tipCard)tipCard.classList.remove("hidden");
+  const today=todayStr();
+  const done=u.ck[today]||[];
+  const doneIds={};done.forEach(function(x){doneIds[x]=1;});
+  $("ckDoneCount").textContent=done.length+"/"+CK_CATS.length;
+  let h="";
+  CK_CATS.forEach(function(c){
+    const isDone=doneIds[c.id];
+    h+='<div class="ck'+(isDone?" done":"")+'" '+(isDone?"":'onclick="doCheck(\''+c.id+'\')"')+'>'
+      +'<span class="ck-ico">'+c.ico+'</span>'
+      +(isDone?'<span class="tick">✔</span>':"")
+      +'<div class="ck-nm">'+c.nm+'</div>'
+      +'<div class="ck-pts">'+(isDone?"已打卡 +"+CK_PTS:"+"+CK_PTS+" 积分")+'</div>'
+      +(isDone?"":'<div class="ck-pts" style="font-size:11px">'+c.tip+'</div>')
+      +'</div>';
+  });
+  $("checkGrid").innerHTML=h;
+  $("streakBar").innerHTML='<span class="streak-fire">🔥</span>'
+    +'<div style="flex:1"><div class="streak-num">连续打卡 '+u.streak+' 天</div>'
+    +'<div class="streak-txt">每连续 7 天奖励 +'+STREAK_BONUS+' 分；一天 5 项全勤再奖 +'+CK_BONUS+' 分</div></div>';
+  $("tipBox").textContent=SZ_TIPS[Math.floor((Date.now()/86400000)%SZ_TIPS.length)];
+}
+function doCheck(cid){
+  const u=user(CUR);const today=todayStr();
+  const done=u.ck[today]||[];
+  if(done.indexOf(cid)>=0){toast("今天这项已经打过卡啦");return;}
+  done.push(cid);u.ck[today]=done;
+  const isFirst=u.lastCk!==today&&u.lastCk===yesterdayStr();
+  const wasFull=done.length===CK_CATS.length;
+  let gained=CK_PTS;
+  if(u.lastCk!==today){u.streak=(u.lastCk===yesterdayStr())?u.streak+1:1;u.lastCk=today;}
+  if(u.streak>0&&u.streak%7===0&&done.length===1){gained+=STREAK_BONUS;setPoints(u,STREAK_BONUS,"连续打卡 "+u.streak+" 天奖励");}
+  setPoints(u,CK_PTS,CK_CATS.filter(function(c){return c.id===cid;})[0].nm+"打卡");
+  if(wasFull){u.fullDays=(u.fullDays||0)+1;setPoints(u,CK_BONUS,"今日五项全勤奖励");toast("🎉 今日五项全勤 +"+CK_BONUS);}
+  saveDB();renderCheckin();refreshTop();
+  toast("✅ "+CK_CATS.filter(function(c){return c.id===cid;})[0].nm+"打卡成功 +"+CK_PTS);
+}
+function renderParentCheckin(){
+  const kids=["bro","sis"].map(function(k){return DB.users[k];}).filter(Boolean);
+  const today=todayStr();
+  let rows="";
+  kids.forEach(function(k){
+    const done=k.ck[today]||[];const dMap={};done.forEach(function(x){dMap[x]=1;});
+    const chips=CK_CATS.map(function(c){return '<span class="pill '+(dMap[c.id]?"pill-green":"")+'" style="'+(dMap[c.id]?"":"opacity:.45")+'">'+c.ico+' '+c.nm+'</span>';}).join(" ");
+    const quizTxt=k.quizDone===today?"✅ 今日一练已完成":"⬜ 今日一练未完成";
+    rows+='<div class="card"><div class="row between"><div class="row gap8"><div style="font-size:28px">'+k.emoji+'</div>'
+      +'<div><div style="font-weight:800">'+esc(k.name)+' · '+k.grade+' 年级</div>'
+      +'<div class="muted" style="font-size:12px">连续 '+k.streak+' 天 · 🪙'+k.points+' 分</div></div></div></div>'
+      +'<div style="margin-top:10px">'+chips+'</div>'
+      +'<div style="margin-top:8px;font-size:13px" class="muted">'+quizTxt+' · 近 7 日打卡：'+recent7(k)+' 天</div></div>';
+  });
+  $("checkGrid").innerHTML=rows;
+  $("streakBar").innerHTML='<span class="streak-fire">👨‍👩‍👧‍👦</span><div style="flex:1"><div class="streak-num">孩子今日进度</div><div class="streak-txt">家长可在此查看两个孩子今天完成情况，到「后台」可补发或扣减积分</div></div>';
+  $("ckDoneCount").textContent="家长视图";
+  $("tipBox").parentElement.classList.add("hidden");
+}
+function recent7(k){
+  let n=0;for(let i=0;i<7;i++){
+    const d=new Date(Date.now()-i*86400000);
+    const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    if((k.ck[ds]||[]).length>0)n++;
+  }
+  return n;
+}
+/* ================= 每日一练（小升初/同步） ================= */
+function dailyPlan(g){
+  return g>=6?[{cat:"math",n:3,seed:1},{cat:"eng",n:2,seed:5},{cat:"poem",n:1,seed:9}]
+             :[{cat:"math",n:2,seed:1},{cat:"eng",n:1,seed:5},{cat:"poem",n:1,seed:9}];
+}
+function catInfo(c){return c==="math"?{nm:"数学",ico:"🔢"}:c==="eng"?{nm:"英语",ico:"🇬🇧"}:{nm:"古诗",ico:"📜"};}
+function renderQuiz(){
+  const u=user(CUR);const today=todayStr();
+  if(u.quizDone===today){renderQuizDone();return;}
+  if(!QUIZ_STATE||QUIZ_STATE.forDate!==today||QUIZ_STATE.forGrade!==u.grade||QUIZ_STATE.finished){startQuiz();}
+  renderQuizQ();
+}
+function startQuiz(){
+  const u=user(CUR);const today=todayStr();
+  const plan=dailyPlan(u.grade);
+  const list=[];
+  plan.forEach(function(item){
+    const bank=BANKS[u.grade][item.cat];
+    for(let i=0;i<item.n;i++){list.push({cat:item.cat,seed:item.seed+i,q:pickQ(bank,item.seed+i)});}
+  });
+  QUIZ_STATE={forDate:today,forGrade:u.grade,list:list,idx:0,correct:0,gained:0,finished:false,picked:-1};
+}
+function renderQuizQ(){
+  const st=QUIZ_STATE;const u=user(CUR);
+  const cur=st.list[st.idx];const ci=catInfo(cur.cat);
+  let h='<div class="quiz-head row between"><span>✏️ 每日一练 · '+u.name+'</span><span>'+ci.ico+ci.nm+'</span></div>';
+  h+='<div style="margin:8px 0" class="row gap8">'
+    +'<span class="pill pill-blue">第 '+(st.idx+1)+' / '+st.list.length+' 题</span>'
+    +'<span class="pill pill-green">已对 '+st.correct+' 题</span>'
+    +'<span class="pill pill-amber">本轮 +'+st.gained+' 分</span></div>';
+  h+='<div class="q-card"><span class="q-sub">'+esc(cur.q.s)+'</span>'
+    +'<div class="q-text">'+esc(cur.q.q)+'</div>'
+    +'<div class="q-meta mt8">答对得 <b>'+cur.q.p+'</b> 分 · 选自深圳教材同步题库</div>'
+    +'<div class="opts" id="qOpts">';
+  cur.q.o.forEach(function(op,i){
+    let cls="opt";let dis="";
+    if(st.picked>=0){
+      dis=" disabled";
+      if(i===cur.q.a)cls+=" correct";
+      else if(i===st.picked)cls+=" wrong";
+    }
+    h+='<div class="'+cls+'" '+dis+' onclick="qPick('+i+')">'+String.fromCharCode(65+i)+'. '+esc(op)+'</div>';
+  });
+  h+='</div>';
+  if(st.picked>=0){
+    const right=st.picked===cur.q.a;
+    h+='<div class="expl">💡 解析：'+esc(cur.q.ex)+'</div>';
+    h+='<div style="text-align:right;margin-top:14px"><button class="btn btn-p" onclick="qNext()">'
+      +(st.idx+1>=st.list.length?"完成本日任务 🎉":"下一题 →")+'</button></div>';
+  }
+  h+='</div>';
+  h+='<div style="font-size:12px;color:#9ca3af;margin-top:10px">📌 每天一组题，次日自动换新题；答错的题可以看看解析，弄懂比得分更重要。</div>';
+  $("quizMain").innerHTML=h;
+}
+function qPick(i){
+  const st=QUIZ_STATE;if(st.picked>=0)return;
+  const u=user(CUR);const cur=st.list[st.idx];
+  st.picked=i;
+  if(i===cur.q.a){st.correct++;st.gained+=cur.q.p;setPoints(u,cur.q.p,"每日一练·"+catInfo(cur.cat).nm);refreshTop();}
+  saveDB();renderQuizQ();
+  if(i===cur.q.a)toast("🎉 答对了 +"+cur.q.p+" 分");
+}
+function qNext(){
+  const st=QUIZ_STATE;
+  if(st.idx+1>=st.list.length){
+    st.finished=true;const u=user(CUR);
+    u.quizDone=todayStr();u.quizCorrect+=st.correct;u.quizTotal+=st.list.length;u.quizGot+=st.gained;
+    saveDB();renderQuizDone();
+  }else{st.idx++;st.picked=-1;renderQuizQ();}
+}
+function renderQuizDone(){
+  const u=user(CUR);
+  const last={c:u.quizCorrect,t:u.quizTotal};
+  const todayDone=u.quizDone===todayStr();
+  const totalG=u.quizGot;
+  let h='<div class="q-card quiz-result">';
+  if(todayDone){
+    h+='<div class="rz-ico">🎯</div><div class="rz-txt">今日一练已完成</div>'
+      +'<div class="muted" style="margin-top:6px">累计答对 <b>'+u.quizCorrect+'</b> 题 · 累计赚 <b>'+totalG+'</b> 分</div>';
+  }
+  h+='<div style="margin-top:16px;font-size:13px;color:#6b7280;text-align:left;background:#f8fafc;border-radius:14px;padding:12px">'
+    +'<b>📈 学习小建议</b><br>· 数学：深圳小升初重点在「分数百分数应用题、比与比例、方程思想」<br>'
+    +'· 英语：沪教牛津词汇坚持每天 15 分钟听读<br>· 古诗：部编教材暑假先背七上 12 篇，开学更轻松</div>'
+    +'<div style="margin-top:16px"><button class="btn btn-w btn-sm" onclick="logout()">← 换一个小朋友</button></div>'
+    +'</div>';
+  $("quizMain").innerHTML=h;
+}
+/* ================= 商城 / 兑换 ================= */
+function renderShop(){
+  const u=user(CUR);
+  if(u.role==="parent"){renderAudit();return;}
+  const on=DB.rewards.filter(function(r){return r.on;});
+  let h='<div class="q-card" style="padding:14px 16px"><div class="row between"><div><b style="font-size:17px">🎁 积分商城</b>'
+    +'<div class="muted" style="font-size:12px">赚积分 → 兑换心愿，家长审核通过即生效</div></div>'
+    +'<div class="points-chip">🪙 '+u.points+'</div></div></div>';
+  on.forEach(function(r){
+    const can=u.points>=r.price;
+    h+='<div class="shop-item"><div class="shop-ico">'+r.ico+'</div><div class="shop-info">'
+      +'<div class="shop-nm">'+esc(r.nm)+'</div><div class="shop-desc">兑换后需家长确认</div></div>'
+      +'<div style="text-align:right"><div class="price"><span class="c">🪙</span>'+r.price+'</div>'
+      +'<button class="btn btn-sm '+(can?"btn-o":"")+'" style="margin-top:6px" '+(can?"":"disabled")+' onclick="redeem('+r.id+')">兑换</button></div></div>';
+  });
+  if(on.length===0){h+='<div class="card muted" style="text-align:center">奖品池为空，等家长上架吧</div>';}
+  const pend=u.redeems.filter(function(x){return x.status==="pending";}).length;
+  h+='<div class="sec-title" style="margin-top:18px">📋 我的兑换记录</div>';
+  if(u.redeems.length===0){h+='<div class="card muted" style="text-align:center">还没有兑换记录</div>';}
+  u.redeems.slice(0,10).forEach(function(x){
+    const stTxt=x.status==="pending"?"<span class='pill pill-amber'>待审核</span>":x.status==="ok"?"<span class='pill pill-green'>已通过</span>":"<span class='pill pill-red'>已拒绝</span>";
+    h+='<div class="list-row"><div class="row gap8"><span style="font-size:20px">'+x.ico+'</span><div><div style="font-weight:700">'+esc(x.nm)+'</div><div class="muted" style="font-size:11px">'+x.date+'</div></div></div>'
+      +'<div class="row gap8">'+stTxt+'<span style="font-weight:800;color:#b45309">-'+x.price+'</span></div></div>';
+  });
+  $("shopBody").innerHTML=h;
+}
+function redeem(rid){
+  const u=user(CUR);
+  const r=DB.rewards.filter(function(x){return x.id===rid;})[0];
+  if(!r)return;
+  if(u.points<r.price){toast("积分不够，先去打卡做题赚积分吧");return;}
+  if(confirm("确定用 "+r.price+" 积分兑换「"+r.nm+"」吗？")){
+    setPoints(u,-r.price,"兑换「"+r.nm+"」");
+    u.redeems.unshift({id:Date.now(),ico:r.ico,nm:r.nm,price:r.price,date:todayStr(),status:"pending"});
+    saveDB();renderShop();refreshTop();toast("兑换申请已提交，等家长审核");
+  }
+}
+function renderAudit(){
+  const kids=["bro","sis"].map(function(k){return DB.users[k];}).filter(Boolean);
+  let pending=[];
+  kids.forEach(function(k){k.redeems.forEach(function(x){if(x.status==="pending")pending.push({u:k,x:x});});});
+  let h='<div class="q-card" style="padding:14px 16px"><b style="font-size:17px">🛡️ 兑换审核</b>'
+    +'<div class="muted" style="font-size:12px">孩子兑换申请通过或拒绝（拒绝自动退回积分）</div></div>';
+  if(pending.length===0){h+='<div class="card muted" style="text-align:center">暂无待审核申请</div>';}
+  pending.forEach(function(p){
+    h+='<div class="shop-item"><div class="shop-ico">'+p.x.ico+'</div><div class="shop-info">'
+      +'<div class="shop-nm">'+p.u.emoji+' '+esc(p.u.name)+' 兑换「'+esc(p.x.nm)+'」</div>'
+      +'<div class="shop-desc">'+p.x.date+' · 已扣 '+p.x.price+' 分</div></div>'
+      +'<div style="display:flex;gap:8px"><button class="btn btn-sm btn-g" onclick="auditRedeem(\''+p.u.uid+'\','+p.x.id+',1)">通过</button>'
+      +'<button class="btn btn-sm btn-w" onclick="auditRedeem(\''+p.u.uid+'\','+p.x.id+',0)">拒绝</button></div></div>';
+  });
+  $("shopBody").innerHTML=h;
+}
+function auditRedeem(uid,rid,ok){
+  const k=DB.users[uid];let item=null;
+  k.redeems.forEach(function(x){if(x.id===rid)item=x;});
+  if(!item)return;
+  if(ok){item.status="ok";toast("已通过 "+k.name+" 的兑换");}
+  else{item.status="no";setPoints(k,item.price,"兑换被拒绝退回");toast("已拒绝并退回 "+item.price+" 分");}
+  saveDB();renderShop();
+}
+/* ================= 我的 ================= */
+function renderMine(){
+  const u=user(CUR);
+  if(u.role==="parent"){renderParentMine();return;}
+  const today=todayStr();
+  const done=(u.ck[today]||[]).length;
+  let h='<div class="q-card"><div class="row gap12">'
+    +'<div style="font-size:44px">'+u.emoji+'</div>'
+    +'<div style="flex:1"><div style="font-weight:900;font-size:19px">'+esc(u.name)+'</div>'
+    +'<div class="muted" style="font-size:13px">'+esc(u.sub)+'</div></div></div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">'
+    +'<div style="text-align:center;background:#eff6ff;border-radius:14px;padding:10px 4px"><div style="font-weight:900;font-size:20px;color:#2563eb">'+u.points+'</div><div class="muted" style="font-size:11px">当前积分</div></div>'
+    +'<div style="text-align:center;background:#fff7ed;border-radius:14px;padding:10px 4px"><div style="font-weight:900;font-size:20px;color:#ea580c">'+u.streak+'</div><div class="muted" style="font-size:11px">连续天数</div></div>'
+    +'<div style="text-align:center;background:#f0fdf4;border-radius:14px;padding:10px 4px"><div style="font-weight:900;font-size:20px;color:#16a34a">'+(u.fullDays||0)+'</div><div class="muted" style="font-size:11px">全勤天数</div></div>'
+    +'</div></div>';
+  h+='<div class="admin-sec"><div class="h">📈 今日进度</div>'
+    +'<div style="height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden"><div style="height:100%;width:'+(done/CK_CATS.length*100)+'%;background:linear-gradient(90deg,#60a5fa,#22c55e);border-radius:999px"></div></div>'
+    +'<div class="muted" style="font-size:12px;margin-top:6px">打卡 '+done+'/'+CK_CATS.length+' 项'+(u.quizDone===today?" · 一练已完成 ✅":" · 一练未完成")+'</div></div>';
+  h+='<div class="admin-sec"><div class="h">💧 积分流水</div>';
+  if(u.flows.length===0){h+='<div class="muted" style="font-size:13px;text-align:center;padding:8px">暂无记录，快去打卡吧</div>';}
+  u.flows.slice(0,15).forEach(function(f){
+    const d=new Date(f.t);
+    const ds=d.getMonth()+1+"月"+d.getDate()+"日 "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+    h+='<div class="flow-item"><span class="muted" style="font-size:11px;width:78px">'+ds+'</span>'
+      +'<span style="flex:1">'+esc(f.note)+'</span>'
+      +'<span class="'+(f.pts>=0?"flow-p":"flow-m")+'">'+(f.pts>=0?"+":"")+f.pts+'</span></div>';
+  });
+  h+='</div>';
+  h+='<button class="btn btn-w" style="width:100%" onclick="logout()">← 换一个小朋友</button>';
+  $("mineBody").innerHTML=h;
+}
+function renderParentMine(){
+  const p=user("parent");
+  let h='<div class="admin-sec"><div class="h">🔐 家长设置</div>'
+    +'<label class="lb">修改家长密码（4 位数字）</label>'
+    +'<input class="inp" id="parentPin" maxlength="4" inputmode="numeric" value="'+p.pin+'">'
+    +'<button class="btn btn-p btn-sm mt8" onclick="saveParentPin()">保存密码</button></div>';
+  h+='<div class="admin-sec"><div class="h">💾 数据备份</div>'
+    +'<div style="font-size:13px" class="muted">所有打卡和积分只存在这台设备的浏览器里。建议每周导出一次备份。</div>'
+    +'<div class="row gap8 mt8"><button class="btn btn-p btn-sm" onclick="exportDB()">📤 导出备份</button>'
+    +'<button class="btn btn-w btn-sm" onclick="$(\'fileImp\').click()">📥 导入备份</button></div>'
+    +'<input type="file" id="fileImp" accept=".json" class="hidden" onchange="importDB(this)">'
+    +'<button class="btn btn-w btn-sm mt8" style="width:100%" onclick="if(confirm(\'确定清空全部数据？两个孩子积分将归零！\'))resetAll()">⚠️ 清空全部数据（重置）</button></div>';
+  h+='<div class="admin-sec"><div class="h">📖 规则速查</div><div style="font-size:13px;line-height:2">'
+    +'· 每项打卡 +10 分，每日每项 1 次<br>· 一天 5 项全勤 额外 +20 分<br>'
+    +'· 连续打卡每满 7 天 额外 +50 分<br>· 每日一练按题目得分（数学题分值最高）<br>'
+    +'· 兑换需家长审核，拒绝自动退回积分</div></div>';
+  h+='<button class="btn btn-w" style="width:100%" onclick="logout()">← 返回角色选择</button>';
+  $("mineBody").innerHTML=h;
+}
+function saveParentPin(){
+  const v=$("parentPin").value.trim();
+  if(!/^\d{4}$/.test(v)){toast("密码需为 4 位数字");return;}
+  user("parent").pin=v;saveDB();toast("家长密码已更新");
+}
+function exportDB(){
+  const blob=new Blob([JSON.stringify(DB)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="积分乐园备份_"+todayStr()+".json";a.click();
+  URL.revokeObjectURL(a.href);toast("备份已导出");
+}
+function importDB(input){
+  const f=input.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=function(){
+    try{
+      const data=JSON.parse(rd.result);
+      if(!data.users||!data.rewards)throw new Error("bad");
+      DB=data;saveDB();toast("导入成功");renderAdmin();renderParentMine();
+    }catch(e){toast("文件格式不正确");}
+  };
+  rd.readAsText(f);
+}
+function resetAll(){
+  localStorage.removeItem(LS_KEY);loadDB();go("home");toast("已重置");
+}
+/* ================= 家长后台 ================= */
+function renderAdmin(){
+  const u=user("parent");
+  const kids=["bro","sis"].map(function(k){return DB.users[k];}).filter(Boolean);
+  let h='<div class="q-card"><b>🛠️ 家长后台</b><div class="muted" style="font-size:12px">管理档案 · 积分 · 奖品</div></div>';
+  /* 子档案 */
+  kids.forEach(function(k){
+    h+='<div class="admin-sec"><div class="h">'+k.emoji+' '+esc(k.name)+'（'+k.grade+' 年级）· 🪙'+k.points+'</div>'
+      +'<label class="lb">昵称</label><input class="inp" id="nm_'+k.uid+'" value="'+esc(k.name)+'">'
+      +'<label class="lb">年级（决定每日一练难度：4=四年级同步，6=小升初衔接）</label>'
+      +'<select class="inp" id="gr_'+k.uid+'"><option value="4"'+(k.grade===4?" selected":"")+'>四年级</option><option value="6"'+(k.grade===6?" selected":"")+'>六年级（小升初衔接）</option></select>'
+      +'<label class="lb">4 位密码</label><input class="inp" id="pn_'+k.uid+'" maxlength="4" inputmode="numeric" value="'+k.pin+'">'
+      +'<div class="row gap8 mt8"><button class="btn btn-p btn-sm" onclick="saveKid(\''+k.uid+'\')">保存档案</button>'
+      +'<button class="btn btn-g btn-sm" onclick="adjPts(\''+k.uid+'\',10)">+10 奖励</button>'
+      +'<button class="btn btn-o btn-sm" onclick="adjPts(\''+k.uid+'\',-10)">-10</button></div>'
+      +'<label class="lb" style="margin-top:10px">自定义加减分（备注原因）</label>'
+      +'<div class="row gap8"><input class="inp" id="adjn_'+k.uid+'" type="number" value="5" style="width:110px">'
+      +'<input class="inp" id="adjt_'+k.uid+'" placeholder="原因，如：考试进步">'
+      +'<button class="btn btn-sm btn-p" onclick="adjCustom(\''+k.uid+'\')">确定</button></div></div>';
+  });
+  /* 奖品 */
+  h+='<div class="admin-sec"><div class="h">🎁 奖品池管理</div>';
+  DB.rewards.forEach(function(r){
+    h+='<div class="list-row"><div class="row gap8"><span style="font-size:22px">'+r.ico+'</span><div>'
+      +'<div style="font-weight:700">'+esc(r.nm)+'</div><div class="muted" style="font-size:11px">'+r.price+' 分 · '+(r.on?"上架中":"已下架")+'</div></div></div>'
+      +'<div class="row gap8"><button class="btn btn-sm '+(r.on?"btn-w":"btn-g")+'" onclick="toggleReward('+r.id+')">'+(r.on?"下架":"上架")+'</button>'
+      +'<button class="btn btn-sm btn-w" onclick="delReward('+r.id+')">删除</button></div></div>';
+  });
+  h+='<div class="row gap8 mt8"><input class="inp" id="newRico" style="width:70px" maxlength="4" value="🎮" placeholder="图标">'
+    +'<input class="inp" id="newRnm" placeholder="奖品名称" style="flex:1">'
+    +'<input class="inp" id="newRpr" type="number" style="width:100px" value="100" placeholder="积分">'
+    +'<button class="btn btn-p btn-sm" onclick="addReward()">添加</button></div></div>';
+  h+='<div class="admin-sec"><div class="h">🗂️ 使用提示</div><div style="font-size:13px;line-height:2" class="muted">'
+    +'· 题库内容对标：数学·北师大版 / 英语·沪教牛津（含深圳印象）/ 古诗·统编教材<br>'
+    +'· 想增改题目：编辑 index.html 里的 MATH6/ENG6 等数组即可<br>'
+    +'· 部署到 GitHub Pages 后全家手机都能打开（数据各自存在各自设备）</div></div>';
+  $("adminBody").innerHTML=h;
+}
+function saveKid(uid){
+  const k=DB.users[uid];
+  k.name=$("nm_"+uid).value.trim()||k.name;
+  k.grade=parseInt($("gr_"+uid).value,10);
+  const p=$("pn_"+uid).value.trim();
+  if(/^\d{4}$/.test(p))k.pin=p;else{toast("密码需 4 位数字");return;}
+  k.sub=k.grade===6?"小升初冲刺 · 北师大数学+沪教牛津":"四年级同步 · 深圳教材";
+  saveDB();renderAdmin();refreshTop();toast("已保存 "+k.name+" 的档案");
+}
+function adjPts(uid,n){
+  const k=DB.users[uid];
+  setPoints(k,n,n>0?"家长奖励":"家长扣减");
+  saveDB();renderAdmin();toast("已为 "+k.name+(n>0?" +":" ")+n+" 分");
+}
+function adjCustom(uid){
+  const k=DB.users[uid];
+  const n=parseInt($("adjn_"+uid).value,10)||0;
+  const t=$("adjt_"+uid).value.trim()||"家长调整";
+  if(!n){toast("请输入不为 0 的数字");return;}
+  setPoints(k,n,t);saveDB();renderAdmin();toast("已"+((n>0)?"加":"扣")+Math.abs(n)+" 分："+t);
+}
+function toggleReward(id){DB.rewards.forEach(function(r){if(r.id===id)r.on=r.on?0:1;});saveDB();renderAdmin();}
+function delReward(id){DB.rewards=DB.rewards.filter(function(r){return r.id!==id;});saveDB();renderAdmin();}
+function addReward(){
+  const ico=$("newRico").value.trim()||"🎁";
+  const nm=$("newRnm").value.trim();const pr=parseInt($("newRpr").value,10);
+  if(!nm||!pr){toast("请填写奖品名称和积分");return;}
+  DB.rewards.push({id:Date.now(),ico:ico,nm:nm,price:pr,on:1});
+  saveDB();renderAdmin();toast("奖品已添加");
+}
+/* ================= Toast 与初始化 ================= */
+let toastTimer=null;
+function toast(msg){
+  const t=$("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove("show");},2200);
+}
+function showView(v){
+  ["view-home","view-pin","view-main"].forEach(function(id){$(id).classList.add("hidden");});
+  $("view-"+v).classList.remove("hidden");
+}
+function init(){
+  loadDB();
+  bindKeyListeners();
+  showView("home");
+  renderHome();
+}
+function bindKeyListeners(){
+  // 防误触：仅桌面端方便按 Esc 回角色选择
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){if(CUR)logout();else if(PIN_UID){PIN_UID=null;go("home");}}
+  });
+}
+document.addEventListener("DOMContentLoaded",init);
+</script>
+</body>
+</html>
